@@ -1,0 +1,1172 @@
+openapi: 3.0.2
+info:
+  title: colocard API
+  description: colocard API documentation.
+  version: 0.4.0
+
+servers:
+  - url: https://colocard.thebossdev.io
+    description: Main production server secured by Keycloak.
+
+components:
+  parameters:
+    pageParam:
+      in: query
+      name: p
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      required: false
+      description: Current page.
+    pageSizeParam:
+      in: query
+      name: pageSize
+      schema:
+        type: integer
+        minimum: 1
+        default: 100
+      required: false
+      description: Set the number of items returned per page.
+    populateParam:
+      in: query
+      name: populate
+      schema:
+        type: string
+      required: false
+      description: >
+        Replace the document id in the provided field in each object with its corresponding document.
+        To populate multiple fields per object, pass a string containing each field separated by a comma.
+    queryParam:
+      in: query
+      name: q
+      schema:
+        type: object
+      required: false
+      description: Query object as JSON. Supports MongoDB statements.
+    selectParam:
+      in: query
+      name: select
+      schema:
+        type: string
+      required: false
+      description: >
+        Select a subset of fields in each object. To select multiple fields per object,
+        pass a string containing each field separated by a comma.
+    sortParam:
+      in: query
+      name: sort
+      schema:
+        type: string
+      required: false
+      description:
+        Fields to sort on. To sort on multiple fields, pass a string containing
+        each sort statement separated by a command.
+
+  responses:
+    Forbidden:
+      description: Prohibited from accessing the specified resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: prohibited user, or missing a whitelisted audience and/or role
+
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: not found
+    Unauthorized:
+      description: Authentication failed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: missing access token
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: internal server error
+
+  schemas:
+    Artifact:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        type:
+          type: string
+        zslice:
+          type: number
+      required:
+        - type
+        - zslice
+    Decision:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        author:
+          type: string
+        date:
+          type: integer
+          minimum: 0
+        decision:
+          type: string
+          enum:
+            - 'yes'
+            - 'no'
+            - maybe
+      required:
+        - author
+        - decision
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Graph:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        author:
+          type: string
+        decisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Decision'
+        metadata:
+          type: object
+        namespace:
+          type: string
+        parent:
+          type: string
+        structure:
+          type: object
+          properties:
+            directed:
+              type: boolean
+            graph:
+              type: object
+            links:
+              type: array
+              items:
+                type: object
+            multigraph:
+              type: boolean
+            nodes:
+              type: array
+              items:
+                type: object
+          required:
+            - directed
+            - links
+            - multigraph
+            - nodes
+        submitted:
+          type: integer
+          minimum: 0
+        volume:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Volume'
+      required:
+        - author
+        - namespace
+        - structure
+        - volume
+    Node:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        author:
+          type: string
+        coordinate:
+          type: array
+          items:
+            type: number
+          minItems: 3
+          maxItems: 3
+        created:
+          type: integer
+          minimum: 0
+        decisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Decision'
+        metadata:
+          type: object
+        namespace:
+          type: string
+        submitted:
+          type: integer
+          minimum: 0
+        type:
+          type: string
+        volume:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Volume'
+      required:
+        - author
+        - coordinate
+        - created
+        - namespace
+        - type
+        - volume
+    Question:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Artifact'
+        assignee:
+          type: string
+        author:
+          type: string
+        closed:
+          type: integer
+          minimum: 0
+        created:
+          type: integer
+          minimum: 0
+        instructions:
+          type: object
+        metadata:
+          type: object
+        namespace:
+          type: string
+        opened:
+          type: integer
+          minimum: 0
+        priority:
+          type: number
+          minimum: 0
+        status:
+          type: string
+          enum:
+            - complete
+            - errored
+            - open
+            - pending
+        volume:
+          oneOf:
+            - type: string
+            - $ref: '#/components/schemas/Volume'
+      required:
+        - assignee
+        - author
+        - instructions
+        - namespace
+        - priority
+        - volume
+    Volume:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        author:
+          type: string
+        bounds:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 3
+            maxItems: 3
+          minItems: 2
+          maxItems: 2
+        metadata:
+          type: object
+        name:
+          type: string
+        namespace:
+          type: string
+        resolution:
+          type: integer
+          minimum: 0
+        uri:
+          type: string
+      required:
+        - author
+        - bounds
+        - name
+        - namespace
+        - resolution
+        - uri
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []    
+
+paths:
+  /graphs:
+    get:
+      tags:
+        - Graphs
+      summary: Get paginated list of Graph objects.
+      parameters:
+        - $ref: '#/components/parameters/queryParam'
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/populateParam'
+        - $ref: '#/components/parameters/selectParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: A JSON array of Graph objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Graph'
+        '400':
+          description: Bad request. The query param q must be a valid JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Graphs
+      summary: Creates one or more Graphs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Graph'
+      responses:
+        '201':
+          description: Created. A JSON array of Graph objects with IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Graph'
+        '400':
+          description: Bad request. One or more of the Graph objects are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /graphs/{graphId}:
+    parameters:
+      - name: graphId
+        in: path
+        required: true
+        description: Graph ID.
+        schema:
+          type: string
+    delete:
+      tags:
+        - Graphs
+      summary: Deactivates a Graph by ID.
+      responses:
+        '204':
+          description: The Graph has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Graphs
+      summary: Returns a Graph by ID.
+      responses:
+        '200':
+          description: A Graph object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Graph'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /graphs/{graphId}/decisions:
+    patch:
+      tags:
+        - Graphs
+      summary: Add a Decision object to a Graph.
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          description: Graph ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Decision'
+      responses:
+        '200':
+          description: The Decision has been added to the Graph. Returns the previous Graph object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Graph'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /graphs/{graphId}/decisions/{decisionId}:
+    delete:
+      tags:
+        - Graphs
+      summary: Deactivates a Decision object in a specific Graph object.
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          description: Graph ID.
+          schema:
+            type: string
+        - name: decisionId
+          in: path
+          required: true
+          description: Decision ID.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The Decision object has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /nodes:
+    get:
+      tags:
+        - Nodes
+      summary: Get paginated list of Nodes.
+      parameters:
+        - $ref: '#/components/parameters/queryParam'
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/populateParam'
+        - $ref: '#/components/parameters/selectParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: A JSON array of Node objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+        '400':
+          description: Bad request. The query param q must be a valid JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Nodes
+      summary: Creates one or more Nodes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Node'
+      responses:
+        '201':
+          description: Created. A JSON array of Node objects with IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Node'
+        '400':
+          description: Bad request. One or more of the Node objects are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /nodes/{nodeId}:
+    parameters:
+      - name: nodeId
+        in: path
+        required: true
+        description: Node ID.
+        schema:
+          type: string
+    delete:
+      tags:
+        - Nodes
+      summary: Deactivates a Node by ID.
+      responses:
+        '204':
+          description: The Node has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Nodes
+      summary: Returns a Node by ID.
+      responses:
+        '200':
+          description: A Node object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /nodes/{nodeId}/decisions:
+    patch:
+      tags:
+        - Nodes
+      summary: Add a Decision object to a Node.
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          description: Node ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Decision'
+      responses:
+        '200':
+          description: The Decision has been added to the Node. Returns the previous Node object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /nodes/{nodeId}/decisions/{decisionId}:
+    delete:
+      tags:
+        - Nodes
+      summary: Deactivates a Decision object in a specific Node object.
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          description: Node ID.
+          schema:
+            type: string
+        - name: decisionId
+          in: path
+          required: true
+          description: Decision ID.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The Decision object has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /questions:
+    get:
+      tags:
+        - Questions
+      summary: Get paginated list of Questions.
+      parameters:
+        - $ref: '#/components/parameters/queryParam'
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/populateParam'
+        - $ref: '#/components/parameters/selectParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: A JSON array of Question objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request. The query param q must be a valid JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Questions
+      summary: Creates one or more Questions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Question'
+      responses:
+        '201':
+          description: Created. A JSON array of Question objects with IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request. One or more of the Question objects are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /questions/{questionId}:
+    parameters:
+      - name: questionId
+        in: path
+        required: true
+        description: Question ID.
+        schema:
+          type: string
+    delete:
+      tags:
+        - Questions
+      summary: Deactivates a Question by ID.
+      responses:
+        '204':
+          description: The Question has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Questions
+      summary: Returns a Question by ID.
+      responses:
+        '200':
+          description: A Question object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /questions/{questionId}/artifacts:
+    patch:
+      tags:
+        - Questions
+      summary: Add an Artifact object to a Question.
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: Question ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Artifact'
+      responses:
+        '200':
+          description: The Artifact has been added to the Question. Returns the previous Question object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /questions/{questionId}/artifacts/{artifactId}:
+    delete:
+      tags:
+        - Questions
+      summary: Deactivates an Artifact object in a specific Question object.
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: Question ID.
+          schema:
+            type: string
+        - name: artifactId
+          in: path
+          required: true
+          description: Decision ID.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: The Decision object has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /questions/{questionId}/instructions:
+    patch:
+      tags:
+        - Questions
+      summary: Set the instructions of a Question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: Question ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: The instructions have been changed. Returns the previous Question object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /questions/{questionId}/priority:
+    patch:
+      tags:
+        - Questions
+      summary: Set the priority of a Question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: Question ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                priority:
+                  type: number
+                  minimum: 0
+      responses:
+        '200':
+          description: The priority has been changed. Returns the previous Question object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /questions/{questionId}/status:
+    patch:
+      tags:
+        - Questions
+      summary: Set the status of a Question
+      parameters:
+        - name: questionId
+          in: path
+          required: true
+          description: Question ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - complete
+                    - errored
+                    - open
+                    - pending
+      responses:
+        '200':
+          description: The status has been changed. Returns the previous Question object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /volumes:
+    get:
+      tags:
+        - Volumes
+      summary: Get paginated list of Volume objects.
+      parameters:
+        - $ref: '#/components/parameters/queryParam'
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/populateParam'
+        - $ref: '#/components/parameters/selectParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: A JSON array of Volume objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Volume'
+        '400':
+          description: Bad request. The query param q must be a valid JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Volumes
+      summary: Creates one or more Volumes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Volume'
+      responses:
+        '201':
+          description: Created. A JSON array of Volume objects with IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Volume'
+        '400':
+          description: Bad request. One or more of the Volume objects are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /volumes/{volumeId}:
+    parameters:
+      - name: volumeId
+        in: path
+        required: true
+        description: Volume ID.
+        schema:
+          type: string
+    delete:
+      tags:
+        - Volumes
+      summary: Deactivates a Volume by ID.
+      responses:
+        '204':
+          description: The Volume has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Volumes
+      summary: Returns a Volume by ID.
+      responses:
+        '200':
+          description: A Volume object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'

@@ -1,0 +1,15 @@
+version: "3"
+services:
+  mongodb:
+    image: mongo:3.6
+    restart: on-failure
+  colocard:
+    build: "."
+    ports:
+      - 9005:9005
+    restart: on-failure
+    depends_on:
+      - mongodb
+    environment:
+      COLOCARD_MONGODB_DATABASE: colocard
+      COLOCARD_MONGODB_HOST: mongodb

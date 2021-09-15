@@ -1,0 +1,44 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {
+        "max-line-length": {
+            "options": [120]
+        }
+    },
+    "rules": {
+        "interface-name": {
+            "options": ["never-prefix"]
+        },
+        "max-classes-per-file": false,
+        "max-line-length": {
+            "options": [120]
+        },
+        "member-ordering": false,
+        "no-console": {
+            "severity": "warning"
+        },
+        "no-empty-interface": {
+            "severity": "warning"
+        },
+        "no-shadowed-variable": {
+            "severity": "warning"
+        },
+        "only-arrow-functions": false,
+        "quotemark": {
+            "options": [
+                "double",
+                "avoid-escape"
+            ]
+        },
+        "triple-equals": {
+            "severity": "warning"
+        },
+        "variable-name": {
+            "severity": "warning"
+        }
+    },
+    "rulesDirectory": []
+}
