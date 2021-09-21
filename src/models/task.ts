@@ -22,7 +22,7 @@ const schema = new Schema({
         default: "incomplete", 
         enum: ["complete", "incomplete"], 
         type: String},
-    points: {type: [point], default: []}
+    points: {type: [Schema.Types.Mixed], default: []}
 });
 
 const Task = model("Task", schema);

@@ -25,7 +25,7 @@ function attach(server: Server, options?: ColocardControllerOptions): void {
     const nodes = new NodeController(models.Node);
     const questions = new QuestionController(models.Question);
     const volumes = new VolumeController(models.Volume);
-    const points = new PointsController(models.Point);
+    const points = new PointController(models.Point);
     const tasks = new TaskController(models.Task);
 
     graphs.attachTo("/graphs", server, _.get("graph", options));

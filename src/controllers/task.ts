@@ -119,7 +119,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             const objId = req.params.objectId;
             const pointId = req.params.artifactId;
 
-            const query = { "_id": objId, "points._id": artifactId };
+            const query = { "_id": objId, "points._id": pointId };
             const update = { $set: { "points.$.active": false } };
 
             this.model.findOneAndUpdate(query, update, (err) => {
@@ -147,7 +147,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.patch(`${root}/:id/instructions`, this.setInstructions());
         server.patch(`${root}/:id/priority`, this.setPriority());
         server.patch(`${root}/:id/status`, this.setStatus());
-        server.patch(`${root}/:id/points`, this.appendPoints());
+        server.patch(`${root}/:id/points`, this.appendPoint());
         server.del(
             `${root}/:objectId/points/:pointId`, this.deactivatePoint(),
         );

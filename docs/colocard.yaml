@@ -1,12 +1,12 @@
 openapi: 3.0.2
 info:
-  title: colocard API
-  description: colocard API documentation.
+  title: NeuVue Queue API
+  description: NeuVue Queue API documentation.
   version: 0.4.0
 
 servers:
-  - url: https://colocard.thebossdev.io
-    description: Main production server secured by Keycloak.
+  - url: https://localhost:9005/
+    description: Main development server.
 
 components:
   parameters:
