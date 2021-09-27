@@ -1,7 +1,5 @@
 import { model, Schema } from "mongoose";
 
-import point from "./point";
-
 const schema = new Schema({
     active: { type: Boolean, default: true },
     assignee: { type: String, required: true },
@@ -15,7 +13,7 @@ const schema = new Schema({
     priority: { type: Number, required: true, min: 0 },
     status: {
         default: "pending",
-        enum: ["completed", "errored", "open", "pending"],
+        enum: ["complete", "errored", "open", "pending"],
         type: String,
     },
     neuron_status: { 
