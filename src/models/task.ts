@@ -20,7 +20,7 @@ const schema = new Schema({
         default: "incomplete", 
         enum: ["complete", "incomplete"], 
         type: String},
-    points: {type: [Schema.Types.Mixed], default: []}
+    points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"}
 });
 
 const Task = model("Task", schema);
