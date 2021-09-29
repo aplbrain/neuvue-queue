@@ -12,6 +12,7 @@ const schema = new Schema({
             },
         },
     },
+    resolution: { type: Number, default: 0}
     created: { type: Number, required: true, min: 0 },
     metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
     namespace: { type: String, required: true },
