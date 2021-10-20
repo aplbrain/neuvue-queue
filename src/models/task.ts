@@ -16,7 +16,7 @@ const schema = new Schema({
         enum: ["closed", "errored", "open", "pending"],
         type: String,
     },
-    seg_id: {type: Number, default: null, min: 0},
+    seg_id: {type: String, default: null},
     points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"}
 });
 
