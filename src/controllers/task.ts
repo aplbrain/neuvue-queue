@@ -29,7 +29,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 update.opened = null;
             } else if (update.status === "open") {
                 update.opened = Date.now();
-            } else if (update.status === "completed" || update.status === "errored") {
+            } else if (update.status === "closed" || update.status === "errored") {
                 update.closed = Date.now();
             }
 
