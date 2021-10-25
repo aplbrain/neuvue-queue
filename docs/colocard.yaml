@@ -166,6 +166,9 @@ components:
         priority:
           type: number
           minimum: 0
+        duration:
+          type: number
+          minimum: 0
         status:
           type: string
           enum:
@@ -186,6 +189,7 @@ components:
         - instructions
         - namespace
         - priority
+        - duration
 
   securitySchemes:
     bearerAuth:
