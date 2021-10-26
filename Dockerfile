@@ -1,7 +1,7 @@
 FROM node:16.10-alpine
 LABEL maintainer "Daniel Xenes <daniel.xenes@jhuapl.edu>"
 
-CMD [ "node", "/opt/colocard/build/bin/colocard" ]
+RUN apk add --no-cache su-exec tini
 EXPOSE 9005
 ENV NODE_CONFIG_DIR=/etc/colocard
 VOLUME [ "/etc/colocard" ]
@@ -16,3 +16,5 @@ WORKDIR /opt/colocard
 RUN yarn \
     && yarn run build
 
+ENTRYPOINT [ "/sbin/tini", "--" ]
+CMD [ "node", "/opt/colocard/build/bin/colocard" ]
