@@ -1,7 +1,7 @@
 {
-  "name": "colocard",
+  "name": "neuvuequeue",
   "version": "0.4.0",
-  "description": "Colocard",
+  "description": "NeuvueQueue",
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aplbrain/colocard.git"
+    "url": "git+https://github.com/aplbrain/neuvuequeue.git"
   },
   "author": "Miller Wilt <miller.wilt@jhuapl.edu>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/aplbrain/colocard/issues"
+    "url": "https://github.com/aplbrain/neuvuequeue/issues"
   },
-  "homepage": "https://github.com/aplbrain/colocard#readme",
+  "homepage": "https://github.com/aplbrain/neuvuequeue#readme",
   "devDependencies": {
     "@types/chai": "^4.1.2",
     "@types/chai-as-promised": "^7.1.0",

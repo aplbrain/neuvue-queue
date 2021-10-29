@@ -3,7 +3,7 @@ services:
   mongodb:
     image: mongo:3.6
     restart: on-failure
-  colocard:
+  neuvuequeue:
     build: "."
     ports:
       - 9005:9005
@@ -11,5 +11,5 @@ services:
     depends_on:
       - mongodb
     environment:
-      COLOCARD_MONGODB_DATABASE: colocard
-      COLOCARD_MONGODB_HOST: mongodb
+      NEUVUEQUEUE_MONGODB_DATABASE: neuvuequeue
+      NEUVUEQUEUE_MONGODB_HOST: mongodb

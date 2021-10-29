@@ -78,7 +78,6 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
             if (!Array.isArray(body)) {
                 body = Array.of(body);
             }
-
             const documents = _.map((raw: object) => new this.model(raw), body);
             Promise.all(_.map((doc: Document) => doc.validate(), documents))
                 .then(() => this.beforeInsert(documents))

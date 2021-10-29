@@ -1,4 +1,4 @@
-import * as colocard from "./colocard";
+import * as neuvuequeue from "./neuvuequeue";
 import controllers from "./controllers";
 import models from "./models";
 import utils from "./utils";
@@ -9,5 +9,5 @@ export default {
         models,
         utils,
     },
-    colocard,
+    neuvuequeue,
 };

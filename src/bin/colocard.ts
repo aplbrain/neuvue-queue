@@ -1,6 +1,6 @@
 import config from "config";
 
-import Colocard, { ColocardConfig } from "../colocard";
+import NeuvueQueue, { NeuvueQueueConfig } from "../neuvuequeue";
 
 const database = config.get<string>("mongodb.database");
 const mongodbHost = config.get<string>("mongodb.host");
@@ -10,7 +10,7 @@ const serverLogLevel = config.get<string>("server.logLevel");
 const serverPort = config.get<number>("server.port");
 
 (async function() {
-    const configuration: ColocardConfig = {
+    const configuration: NeuvueQueueConfig = {
         mongodb: {
             database,
             host: mongodbHost,
@@ -22,8 +22,8 @@ const serverPort = config.get<number>("server.port");
             port: serverPort,
         },
     };
-    const colocard = new Colocard(configuration);
-    await colocard.start();
+    const neuvuequeue = new NeuvueQueue(configuration);
+    await neuvuequeue.start();
 })().catch(() => {
     process.exit(1);
 });

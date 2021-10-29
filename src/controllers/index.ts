@@ -11,7 +11,7 @@ import VolumeController, { VolumeControllerOptions } from "./volume";
 import PointController, { PointControllerOptions } from "./point";
 import TaskController, { TaskControllerOptions } from "./task";
 
-export interface ColocardControllerOptions {
+export interface NeuvueQueueControllerOptions {
     graph?: GraphControllerOptions;
     node?: NodeControllerOptions;
     question?: QuestionControllerOptions;
@@ -20,7 +20,7 @@ export interface ColocardControllerOptions {
     task?: TaskControllerOptions
 }
 
-function attach(server: Server, options?: ColocardControllerOptions): void {
+function attach(server: Server, options?: NeuvueQueueControllerOptions): void {
     const graphs = new GraphController(models.Graph);
     const nodes = new NodeController(models.Node);
     const questions = new QuestionController(models.Question);

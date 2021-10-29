@@ -99,9 +99,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             if (!_.isNumber(req.body.duration) || req.body.duration < 0) {
                 return next(new BadRequestError("duration must be a number >= 0"));
             }
-
-            const update: { [key: string]: any } = { duration: req.body.duration };
-
+            const update = { $inc: {duration: req.body.duration}}
             this.model.findByIdAndUpdate(req.params.id, update, (err, old) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
@@ -173,7 +171,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.del(`${root}/:id`, this.deactivate());
         server.patch(`${root}/:id/instructions`, this.setInstructions());
         server.patch(`${root}/:id/priority`, this.setPriority());
-        server.patch(`${root}/:id/duration`, this.setDuration());
+        // server.patch(`${root}/:id/duration`, this.setDuration());
         server.patch(`${root}/:id/status`, this.setStatus());
         server.patch(`${root}/:id/points`, this.appendPoint());
         server.del(
