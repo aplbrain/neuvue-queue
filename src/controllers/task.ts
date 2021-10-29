@@ -225,7 +225,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.patch(`${root}/:id/status`, this.setStatus());
         server.patch(`${root}/:id/points`, this.appendPoint());
         server.patch(`${root}/:id/metadata`, this.setMetadata());
-        server.patch(`${root}/:id/ngstate`, this.setMetadata());
+        server.patch(`${root}/:id/ngstate`, this.setNgState());
         server.del(
             `${root}/:objectId/points/:pointId`, this.deactivatePoint(),
         );
