@@ -11,6 +11,7 @@ const schema = new Schema({
     namespace: { type: String, required: true },
     opened: { type: Number, default: null, min: 0 },
     priority: { type: Number, required: true, min: 0 },
+    duration: { type: Number, required: true, min: 0 },
     status: {
         default: "pending",
         enum: ["complete", "errored", "open", "pending"],

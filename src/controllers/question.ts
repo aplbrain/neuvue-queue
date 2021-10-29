@@ -21,6 +21,7 @@ export default class QuestionController extends mix(Controller).with(CRUDMixin) 
 
     public setStatus(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next): void => {
+
             const update: { [key: string]: any } = { status: req.body.status };
 
             if (update.status === "pending") {
@@ -48,6 +49,7 @@ export default class QuestionController extends mix(Controller).with(CRUDMixin) 
 
     public setPriority(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next): void => {
+
             if (!_.isNumber(req.body.priority) || req.body.priority < 0) {
                 return next(new BadRequestError("priority must be a number >= 0"));
             }
@@ -71,7 +73,7 @@ export default class QuestionController extends mix(Controller).with(CRUDMixin) 
     public setInstructions(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next): void => {
             if (!_.isPlainObject(req.body.instructions)) {
-                return next(new BadRequestError("priority must be a plain object"));
+                return next(new BadRequestError("instructions must be a plain object"));
             }
 
             const update: { [key: string]: any } = { instructions: req.body.instructions };

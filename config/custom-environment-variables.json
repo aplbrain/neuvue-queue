@@ -1,12 +1,12 @@
 {
     "mongodb": {
-        "database": "COLOCARD_MONGODB_DATABASE",
-        "host": "COLOCARD_MONGODB_HOST",
-        "port": "COLOCARD_MONGODB_PORT"
+        "database": "NEUVUEQUEUE_MONGODB_DATABASE",
+        "host": "NEUVUEQUEUE_MONGODB_HOST",
+        "port": "NEUVUEQUEUE_MONGODB_PORT"
     },
     "server": {
-        "host": "COLOCARD_SERVER_HOST",
-        "logLevel": "COLOCARD_LOG_LEVEL",
-        "port": "COLOCARD_SERVER_PORT"
+        "host": "NEUVUEQUEUE_SERVER_HOST",
+        "logLevel": "NEUVUEQUEUE_LOG_LEVEL",
+        "port": "NEUVUEQUEUE_SERVER_PORT"
     }
 }
