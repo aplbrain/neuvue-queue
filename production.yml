@@ -1,0 +1,22 @@
+version: "3"
+services:
+  mongodb:
+    image: mongo:3.6
+    restart: on-failure
+    networks:
+      - proxy
+  colocard:
+    build: "."
+    restart: on-failure
+    depends_on:
+      - mongodb
+    environment:
+      COLOCARD_MONGODB_DATABASE: colocard
+      COLOCARD_MONGODB_HOST: mongodb
+      VIRTUAL_HOST: queue.neuvue.io
+      LETSENCRYPT_HOST: queue.neuvue.io
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: true 

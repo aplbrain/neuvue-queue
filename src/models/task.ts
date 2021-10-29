@@ -14,13 +14,10 @@ const schema = new Schema({
     duration: { type: Number, required: true, min: 0 },
     status: {
         default: "pending",
-        enum: ["complete", "errored", "open", "pending"],
+        enum: ["closed", "errored", "open", "pending"],
         type: String,
     },
-    neuron_status: { 
-        default: "incomplete", 
-        enum: ["complete", "incomplete"], 
-        type: String},
+    seg_id: {type: String, default: null},
     points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"}
 });
 
