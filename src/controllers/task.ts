@@ -93,7 +93,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         }
     }
 
-    public setDuration(): (req: Request, res: Response, next: Next) => void {
+    public incDuration(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next): void => {
 
             if (!_.isNumber(req.body.duration) || req.body.duration < 0) {
@@ -196,7 +196,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.del(`${root}/:id`, this.deactivate());
         server.patch(`${root}/:id/instructions`, this.setInstructions());
         server.patch(`${root}/:id/priority`, this.setPriority());
-        // server.patch(`${root}/:id/duration`, this.setDuration());
+        server.patch(`${root}/:id/duration`, this.incDuration());
         server.patch(`${root}/:id/status`, this.setStatus());
         server.patch(`${root}/:id/points`, this.appendPoint());
         server.patch(`${root}/:id/metadata`, this.setMetadata());
