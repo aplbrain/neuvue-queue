@@ -1,6 +1,6 @@
 # Neuvue-Queue
 
-Neuvue-Queue is a RESTful API based application server used by the family of colocar applications for storing and retrieving data. It is a fork of [aplbrain/colocard](https://github.com/aplbrain/colocard).
+Neuvue-Queue is a RESTful API based application server used by the family of neuvue applications for storing and retrieving data. It is a fork of [aplbrain/colocard](https://github.com/aplbrain/colocard).
 
 ## Getting Started
 

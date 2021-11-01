@@ -11,8 +11,8 @@ services:
     depends_on:
       - mongodb
     environment:
-      COLOCARD_MONGODB_DATABASE: colocard
-      COLOCARD_MONGODB_HOST: mongodb
+      NEUVUEQUEUE_MONGODB_DATABASE: colocard
+      NEUVUEQUEUE_MONGODB_HOST: mongodb
       VIRTUAL_HOST: queue.neuvue.io
       LETSENCRYPT_HOST: queue.neuvue.io
     networks:
