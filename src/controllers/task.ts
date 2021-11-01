@@ -189,10 +189,9 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
     public setNgState(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next): void => {
             const id = req.params.id;
-            const ng_state = req.body;
             
-            if (!_.isPlainObject(ng_state)) {
-                return next(new BadRequestError("NG State must be a plain object"));
+            if (!_.isPlainObject(state)) {
+                return next(new BadRequestError("state must be a plain object"));
             }
             const update: { [key: string]: any } = { ng_state: req.body.ng_state };
             this.model.findByIdAndUpdate(id, update, (err, old) => {
@@ -225,7 +224,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.patch(`${root}/:id/status`, this.setStatus());
         server.patch(`${root}/:id/points`, this.appendPoint());
         server.patch(`${root}/:id/metadata`, this.setMetadata());
-        server.patch(`${root}/:id/ngstate`, this.setNgState());
+        server.patch(`${root}/:id/ng_state`, this.setNgState());
         server.del(
             `${root}/:objectId/points/:pointId`, this.deactivatePoint(),
         );
