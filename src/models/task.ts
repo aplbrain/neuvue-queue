@@ -18,6 +18,7 @@ const schema = new Schema({
         type: String,
     },
     seg_id: {type: String, default: null},
+    ng_state: {type: String, default: null},
     points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"}
 });
 
