@@ -17,4 +17,4 @@ RUN yarn \
     && yarn run build
 
 ENTRYPOINT [ "/sbin/tini", "--" ]
-CMD [ "node", "/opt/neuvuequeue/build/bin/colocard.js" ]
+CMD [ "node", "/opt/neuvuequeue/build/bin/neuvuequeue.js" ]
