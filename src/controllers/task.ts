@@ -211,6 +211,25 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         };
     }
 
+    public setDecision(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+
+            const update: { [key: string]: any } = { status: req.body.decision };
+
+            this.model.findByIdAndUpdate(req.params.id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
+
     public attachTo(root: string, server: Server, options?: TaskControllerOptions): void {
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
@@ -226,6 +245,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.patch(`${root}/:id/points`, this.appendPoint());
         server.patch(`${root}/:id/metadata`, this.setMetadata());
         server.patch(`${root}/:id/ng_state`, this.setNgState());
+        server.patch(`${root}/:id/decision`, this.setDecision());
         server.del(
             `${root}/:objectId/points/:pointId`, this.deactivatePoint(),
         );

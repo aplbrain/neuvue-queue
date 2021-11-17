@@ -19,6 +19,11 @@ const schema = new Schema({
     },
     seg_id: {type: String, default: null},
     ng_state: {type: String, default: null},
+    decision: {
+        default: null,
+        enum: ["yes", "no", "unsure"],
+        type: String,
+    },
     points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"}
 });
 
