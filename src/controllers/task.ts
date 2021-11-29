@@ -6,6 +6,7 @@ import { BadRequestError, NotFoundError } from "restify-errors";
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
+// const auth0 = require('../lib/auth0');
 
 export interface TaskControllerOptions {
     detail?: DetailOptions;
@@ -33,7 +34,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 update.closed = Date.now();
             }
 
-            this.model.findByIdAndUpdate(req.params.id, update, (err, old) => {
+            this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -56,7 +57,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
 
             const update: { [key: string]: any } = { priority: req.body.priority };
 
-            this.model.findByIdAndUpdate(req.params.id, update, (err, old) => {
+            this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -79,7 +80,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
 
             const update: { [key: string]: any } = { instructions: req.body.instructions };
 
-            this.model.findByIdAndUpdate(req.params.id, update, (err, old) => {
+            this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -100,7 +101,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("duration must be a number >= 0"));
             }
             const update = { $inc: {duration: req.body.duration}}
-            this.model.findByIdAndUpdate(req.params.id, update, (err, old) => {
+            this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -146,18 +147,19 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
 
             const query = { "_id": objId, "points._id": pointId };
             const update = { $set: { "points.$.active": false } };
-
-            this.model.findOneAndUpdate(query, update, (err) => {
-                if (err) {
-                    if (err.name === "DocumentNotFoundError") {
-                        return next(new NotFoundError(`${req.params.id} does not exist`));
-                    } else {
-                        return next(err);
-                    }
-                }
+            try {
+                this.model.findOneAndUpdate(query, update);
                 res.status(204);
                 res.end();
-            });
+                
+            }   catch(err) {
+                res.status(500);
+                if (err.name === "DocumentNotFoundError") {
+                    return next(new NotFoundError(`${req.params.id} does not exist`));
+                } else {
+                    return next(err);
+                }
+            }
         };
     }
     
@@ -170,7 +172,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("metadata must be a plain object"));
             }
             const update: { [key: string]: any } = { metadata: req.body };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -195,7 +197,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("state must be a plain object"));
             }
             const update: { [key: string]: any } = { ng_state: req.body.ng_state };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));

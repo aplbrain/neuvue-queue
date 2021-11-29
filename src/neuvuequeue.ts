@@ -117,17 +117,11 @@ export default class NeuvueQueue {
             directory: swagger.absolutePath(),
         }));
 
-        controllers.attach(server, {
-            question: {
-                detail: { populate: ["volume"] },
-                query: { populate: ["volume"] },
-            },
-        });
 
         server.on("restifyError", utils.middleware.logErrorCallback(this.logger));
 
         this.server = server;
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
             this.server.listen(this.configuration.server.port, this.configuration.server.host, () => {
                 resolve();
             });

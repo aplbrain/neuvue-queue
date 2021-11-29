@@ -6,10 +6,12 @@ services:
   neuvuequeue:
     build: "."
     ports:
-      - 9005:9005
+      - 80:80
     restart: on-failure
     depends_on:
       - mongodb
     environment:
       NEUVUEQUEUE_MONGODB_DATABASE: neuvuequeue
       NEUVUEQUEUE_MONGODB_HOST: mongodb
+      # AUTH0_DOMAIN: dev-oe-jgl7m.us.auth0.com
+      # AUTH0_AUDIENCE: https://queue.neuvue.io
