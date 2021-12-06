@@ -115,7 +115,8 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                 const path = url.parse(req.url as string, true);
                 path.query.p = page.toString();
                 // THIS LINE IS DEPRECATED - NEED HELP
-                // delete path.search; // required for url.format to re-generate querystring
+                // @ts-ignore
+                delete path.search; // required for url.format to re-generate querystring
                 const href = url.format(path);
                 return `<${href}>; rel="${rel}"`;
             }

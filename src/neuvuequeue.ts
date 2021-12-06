@@ -104,7 +104,6 @@ export default class NeuvueQueue {
         server.use(utils.middleware.log(this.logger));
         server.use(restify.plugins.jsonBodyParser());
         server.use(restify.plugins.queryParser());
-
         server.get("/", utils.handlers.serveFile(path.join(__dirname, "..", "public", "index.html")));
 
         server.get("/docs/*", restify.plugins.serveStatic({
@@ -117,6 +116,12 @@ export default class NeuvueQueue {
             directory: swagger.absolutePath(),
         }));
 
+        controllers.attach(server, {
+            point: {
+                detail: { populate: ["hello"] },
+                query: { populate: ["hello"] },
+            },
+        });
 
         server.on("restifyError", utils.middleware.logErrorCallback(this.logger));
 

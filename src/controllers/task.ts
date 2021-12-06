@@ -2,11 +2,11 @@ import _ from "lodash/fp";
 import { Document, Model } from "mongoose";
 import { Next, Request, Response, Server } from "restify";
 import { BadRequestError, NotFoundError } from "restify-errors";
-
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
-// const auth0 = require('../lib/auth0');
+import auth0 from '../lib/auth0';
+
 
 export interface TaskControllerOptions {
     detail?: DetailOptions;
@@ -217,19 +217,22 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
         }
+        const readScopes = 'read:tasks';
+        const writeScopes = 'update:tasks';
+
         server.get(root, this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
-        server.post(root, this.insert());
-        server.del(`${root}/:id`, this.deactivate());
-        server.patch(`${root}/:id/instructions`, this.setInstructions());
-        server.patch(`${root}/:id/priority`, this.setPriority());
-        server.patch(`${root}/:id/duration`, this.incDuration());
-        server.patch(`${root}/:id/status`, this.setStatus());
-        server.patch(`${root}/:id/points`, this.appendPoint());
-        server.patch(`${root}/:id/metadata`, this.setMetadata());
-        server.patch(`${root}/:id/ng_state`, this.setNgState());
+        server.post(root, auth0(true), this.insert());
+        server.del(`${root}/:id`, auth0(true),this.deactivate());
+        server.patch(`${root}/:id/instructions`, auth0(true), this.setInstructions());
+        server.patch(`${root}/:id/priority`, auth0(true), this.setPriority());
+        server.patch(`${root}/:id/duration`, auth0(true), this.incDuration());
+        server.patch(`${root}/:id/status`, auth0(true), this.setStatus());
+        server.patch(`${root}/:id/points`, auth0(true), this.appendPoint());
+        server.patch(`${root}/:id/metadata`, auth0(true), this.setMetadata());
+        server.patch(`${root}/:id/ng_state`, auth0(true), this.setNgState());
         server.del(
-            `${root}/:objectId/points/:pointId`, this.deactivatePoint(),
+            `${root}/:objectId/points/:pointId`, auth0(true), this.deactivatePoint(),
         );
     }
 }
