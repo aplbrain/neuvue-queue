@@ -169,7 +169,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             if (!_.isPlainObject(metadata)) {
                 return next(new BadRequestError("metadata must be a plain object"));
             }
-            const update: { [key: string]: any } = { metadata: req.body };
+            const update: { [key: string]: any } = { metadata: req.body.metadata };
             this.model.findByIdAndUpdate(id, update, (err, old) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
