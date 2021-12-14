@@ -21,7 +21,7 @@ const schema = new Schema({
     ng_state: {type: String, default: null},
     decision: {
         default: null,
-        enum: ["yes", "no", "unsure"],
+        enum: ["yes", "yesConditional", "no", "unsure"],
         type: String,
     },
     points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"}
