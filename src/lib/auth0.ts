@@ -18,10 +18,11 @@ const tokenGuard = rjwt({
 
 export default function auth0(checkScopes:Boolean, scope?:string) {
   return function mid(req:any, res:any, next:any) {
-    console.log("AUTH")
     if (!scope) {
       scope = "";
     }
+    console.log("AUTH", scope)
+
     tokenGuard(req, res, checkScopes, scope, (err:any) => {
       console.log(err)
       err ? res.status(500).send(err) : next();

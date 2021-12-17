@@ -121,8 +121,8 @@ export default class NeuvueQueue {
 
         controllers.attach(server, {
             point: {
-                detail: { populate: ["points"] },
-                query: { populate: ["points"] },
+                detail: {},
+                query: {},
             },
         });
 

@@ -222,17 +222,17 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
 
         server.get(root, this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
-        server.post(root, auth0(true), this.insert());
-        server.del(`${root}/:id`, auth0(true),this.deactivate());
-        server.patch(`${root}/:id/instructions`, auth0(true), this.setInstructions());
-        server.patch(`${root}/:id/priority`, auth0(true), this.setPriority());
-        server.patch(`${root}/:id/duration`, auth0(true), this.incDuration());
-        server.patch(`${root}/:id/status`, auth0(true), this.setStatus());
-        server.patch(`${root}/:id/points`, auth0(true), this.appendPoint());
-        server.patch(`${root}/:id/metadata`, auth0(true), this.setMetadata());
-        server.patch(`${root}/:id/ng_state`, auth0(true), this.setNgState());
+        server.post(root, auth0(true, writeScopes), this.insert());
+        server.del(`${root}/:id`, auth0(true, writeScopes),this.deactivate());
+        server.patch(`${root}/:id/instructions`, auth0(true, writeScopes), this.setInstructions());
+        server.patch(`${root}/:id/priority`, auth0(true, writeScopes), this.setPriority());
+        server.patch(`${root}/:id/duration`, auth0(true, writeScopes), this.incDuration());
+        server.patch(`${root}/:id/status`, auth0(true, writeScopes), this.setStatus());
+        server.patch(`${root}/:id/points`, auth0(true, writeScopes), this.appendPoint());
+        server.patch(`${root}/:id/metadata`, auth0(true, writeScopes), this.setMetadata());
+        server.patch(`${root}/:id/ng_state`, auth0(true, writeScopes), this.setNgState());
         server.del(
-            `${root}/:objectId/points/:pointId`, auth0(true), this.deactivatePoint(),
+            `${root}/:objectId/points/:pointId`, auth0(true, writeScopes), this.deactivatePoint(),
         );
     }
 }
