@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "@types/http-errors": "^1.8.1",
+    "axios": "^0.24.0",
     "async": "^3.2.2",
     "config": "^1.30.0",
     "express-unless": "^1.0.0",
@@ -61,7 +62,7 @@
     "jwks-rsa": "^2.0.5",
     "lodash": "^4.17.21",
     "mime": "^2.4.0",
-    "mongoose": "^5.7.5",
+    "mongoose": "^6.1.2",
     "on-finished": "^2.3.0",
     "on-headers": "^1.0.1",
     "pino": "^4.17.6",

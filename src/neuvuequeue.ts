@@ -11,11 +11,14 @@ import * as swagger from "swagger-ui-dist";
 import controllers from "./controllers";
 import utils from "./utils";
 
+
 export interface NeuvueQueueConfig {
     mongodb: {
         database: string,
         host: string | string[],
-        options?: mongoose.ConnectionOptions,
+        // TODO This typing should be better, but the previous option of using 
+        // mongoose.ConnectionOptions is deprecated in the newest version of mongoose
+        options?: any,
         port: number | number[],
     };
     server: {
@@ -118,8 +121,8 @@ export default class NeuvueQueue {
 
         controllers.attach(server, {
             point: {
-                detail: { populate: ["hello"] },
-                query: { populate: ["hello"] },
+                detail: { populate: ["points"] },
+                query: { populate: ["points"] },
             },
         });
 

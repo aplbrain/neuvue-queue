@@ -137,6 +137,13 @@ components:
         - namespace
         - type
         - volume
+    Auth:
+      type: object
+      properties:
+        code:
+          type: string
+      required:
+        - code
     Task:
       type: object
       properties:
@@ -321,8 +328,127 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-
-  /Tasks:
+  /auth:
+    get:
+      tags:
+        - Auth
+      summary: Endpoint for receiving access tokens
+      parameters:
+        - $ref: '#/components/parameters/queryParam'
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/populateParam'
+        - $ref: '#/components/parameters/selectParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: An access token.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Auth'
+        '400':
+          description: Bad request. The query param q must be a valid JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Auth
+      summary: Submits a authorization token for validation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Point'
+      responses:
+        '201':
+          description: Created. A JSON array of Point objects with IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Point'
+        '400':
+          description: Bad request. One or more of the Point objects are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /auth/{authID}:
+    parameters:
+      - name: authId
+        in: path
+        required: true
+        description: auth ID.
+        schema:
+          type: string
+    delete:
+      tags:
+        - Auth
+      summary: Deletes a auth ID
+      responses:
+        '204':
+          description: The auth has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Auth
+      summary: Returns a auth by ID.
+      responses:
+        '200':
+          description: A auth object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Auth'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'  
+  /tasks:
     get:
       tags:
         - Tasks

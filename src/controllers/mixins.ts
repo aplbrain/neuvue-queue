@@ -23,7 +23,7 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
 
     public deactivate(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next) => {
-            this.model.findByIdAndUpdate(req.params.id, { active: false }, (err) => {
+            this.model.findByIdAndUpdate(req.params.id, { active: false }, (err:Error) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -58,7 +58,7 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                 query = query.sort(sort.replace(/,/g, " "));
             }
 
-            query.exec((err, doc) => {
+            query.exec((err:any, doc:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -87,11 +87,11 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                     // errors very differently.
                     this.model.collection.insertMany(objs)
                         .then(() => this.afterInsert(objs))
-                        .then((objs) => {
+                        .then((objs:any) => {
                             res.status(201);
                             res.json(objs);
                         })
-                        .catch((err) => {
+                        .catch((err:Error) => {
                             next(err);
                         });
                 })
@@ -202,7 +202,7 @@ export const DecidableMixin = (superclass: any) => class extends superclass {
             const update = { $push: { decisions: decision } };
             const options = { runValidators: true };
 
-            this.model.findByIdAndUpdate(id, update, options, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, options, (err:Error, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
