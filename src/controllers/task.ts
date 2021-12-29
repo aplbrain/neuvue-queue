@@ -215,7 +215,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         return (req: Request, res: Response, next: Next): void => {
             const id = req.params.id;
             
-            if (!_.isPlainObject(ng_state)) {
+            if (!_.isPlainObject(req.body)) {
                 return next(new BadRequestError("state must be a plain object"));
             }
             const update: { [key: string]: any } = { ng_state: req.body.namespace };
