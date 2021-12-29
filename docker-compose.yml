@@ -1,9 +1,14 @@
 version: "3"
 services:
   mongodb:
+    container_name: mongodb
     image: mongo:3.6
     restart: on-failure
+    volumes:
+      - mongo-data:/data/db
+      - /data/archive:/data/archive/
   neuvuequeue:
+    container_name: neuvuequeue
     build: "."
     ports:
       - 9005:9005
@@ -11,5 +16,7 @@ services:
     depends_on:
       - mongodb
     environment:
-      NEUVUEQUEUE_MONGODB_DATABASE: neuvuequeue
+      NEUVUEQUEUE_MONGODB_DATABASE: neuvue
       NEUVUEQUEUE_MONGODB_HOST: mongodb
+volumes:
+  mongo-data:
