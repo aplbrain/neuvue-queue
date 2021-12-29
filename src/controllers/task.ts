@@ -211,6 +211,30 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         };
     }
 
+    public setNamespace(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            const id = req.params.id;
+            
+            if (!_.isPlainObject(req.body)) {
+                return next(new BadRequestError("state must be a plain object"));
+            }
+            const update: { [key: string]: any } = { namespace: req.body.namespace };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else if (err.name === "ValidationError") {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
+
     public attachTo(root: string, server: Server, options?: TaskControllerOptions): void {
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
@@ -226,6 +250,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.patch(`${root}/:id/points`, this.appendPoint());
         server.patch(`${root}/:id/metadata`, this.setMetadata());
         server.patch(`${root}/:id/ng_state`, this.setNgState());
+        server.patch(`${root}/:id/namespace`, this.setNamespace());
         server.del(
             `${root}/:objectId/points/:pointId`, this.deactivatePoint(),
         );
