@@ -218,7 +218,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             if (!_.isPlainObject(req.body)) {
                 return next(new BadRequestError("state must be a plain object"));
             }
-            const update: { [key: string]: any } = { ng_state: req.body.namespace };
+            const update: { [key: string]: any } = { namespace: req.body.namespace };
             this.model.findByIdAndUpdate(id, update, (err, old) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
