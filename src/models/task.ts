@@ -19,7 +19,8 @@ const schema = new Schema({
     },
     seg_id: {type: String, default: null},
     ng_state: {type: String, default: null},
-    points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"}
+    points: {type: [Schema.Types.ObjectId], default: [], ref: "Point"},
+    tags: {type: [String], default: []}
 });
 
 const Task = model("Task", schema);

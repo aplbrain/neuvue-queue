@@ -282,6 +282,29 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             });
         };
     }
+    public setTags(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            const id = req.params.id;
+            
+            if (!_.isPlainObject(req.body)) {
+                return next(new BadRequestError("tags must be a plain object"));
+            }
+            const update: { [key: string]: any } = { tags: req.body.tags };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else if (err.name === "ValidationError") {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
 
     public attachTo(root: string, server: Server, options?: TaskControllerOptions): void {
         if (root.endsWith("/")) {
@@ -301,6 +324,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.patch(`${root}/:id/namespace`, this.setNamespace());
         server.patch(`${root}/:id/seg_id`, this.setSegId());
         server.patch(`${root}/:id/assignee`, this.setAssignee());
+        server.patch(`${root}/:id/tags`, this.setTags());
         server.del(
             `${root}/:objectId/points/:pointId`, this.deactivatePoint(),
         );
