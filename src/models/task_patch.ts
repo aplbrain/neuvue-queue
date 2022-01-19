@@ -10,7 +10,8 @@ const schema = new Schema({
   assignee: {type: String, required: true},
   seg_id: {type: String, required: true},
   timestamp: {type: String, required: true},
-  patch: {type: String, required: true}
+  patch: {type: String, required: true},
+  active: {type: Boolean, default: true}
 })
 
 const TaskPatch = model("TaskPatch", schema);
