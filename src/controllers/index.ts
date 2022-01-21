@@ -10,7 +10,7 @@ import QuestionController, { QuestionControllerOptions } from "./question";
 import VolumeController, { VolumeControllerOptions } from "./volume";
 import PointController, { PointControllerOptions } from "./point";
 import TaskController, { TaskControllerOptions } from "./task";
-import TaskPatchController, { TaskPatchControllerOptions } from "./task_patch";
+import DifferStackController, { DifferStackControllerOptions } from "./differ_stack";
 
 export interface NeuvueQueueControllerOptions {
     graph?: GraphControllerOptions;
@@ -19,7 +19,7 @@ export interface NeuvueQueueControllerOptions {
     volume?: VolumeControllerOptions;
     point?: PointControllerOptions;
     task?: TaskControllerOptions;
-    task_patch?: TaskPatchControllerOptions;
+    differ_stack?: DifferStackControllerOptions;
 }
 
 function attach(server: Server, options?: NeuvueQueueControllerOptions): void {
@@ -29,7 +29,7 @@ function attach(server: Server, options?: NeuvueQueueControllerOptions): void {
     const volumes = new VolumeController(models.Volume);
     const points = new PointController(models.Point);
     const tasks = new TaskController(models.Task);
-    const task_patches = new TaskPatchController(models.TaskPatch);
+    const differ_stack = new DifferStackController(models.DifferStack);
 
     graphs.attachTo("/graphs", server, _.get("graph", options));
     nodes.attachTo("/nodes", server, _.get("node", options));
@@ -37,7 +37,7 @@ function attach(server: Server, options?: NeuvueQueueControllerOptions): void {
     volumes.attachTo("/volumes", server, _.get("volume", options));
     points.attachTo("/points", server, _.get("point", options));
     tasks.attachTo("/tasks", server, _.get("task", options));
-    task_patches.attachTo("/taskpatches", server, _.get("taskpatch", options));
+    differ_stack.attachTo("/differstacks", server, _.get("differstack", options));
 }
 
 export default {
@@ -48,7 +48,7 @@ export default {
     VolumeController,
     PointController,
     TaskController,
-    TaskPatchController,
+    DifferStackController,
     attach,
     mixins,
 };

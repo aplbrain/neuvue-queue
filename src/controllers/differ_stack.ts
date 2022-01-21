@@ -6,19 +6,19 @@ import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
 
-export interface TaskPatchControllerOptions {
+export interface DifferStackControllerOptions {
     detail?: DetailOptions;
     query?: QueryOptions;
 }
 
-export default class TaskPatchController extends mix(Controller).with(CRUDMixin) {
+export default class DifferStackController extends mix(Controller).with(CRUDMixin) {
     private model: Model<Document>;
     constructor(model: Model<Document>) {
         super();
         this.model = model;
     }
 
-    public attachTo(root: string, server: Server, options?: TaskPatchControllerOptions): void {
+    public attachTo(root: string, server: Server, options?: DifferStackControllerOptions): void {
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
         }

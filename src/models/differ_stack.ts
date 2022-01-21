@@ -6,14 +6,11 @@ import { model, Schema } from "mongoose";
 // Here we save them for analysis
 
 const schema = new Schema({
+  active: {type: Boolean, default: true},
   task_id: {type: Schema.Types.ObjectId, ref: "Task", required: true},
-  assignee: {type: String, required: true},
-  seg_id: {type: String, required: true},
-  timestamp: {type: String, required: true},
-  patch: {type: String, required: true},
-  active: {type: Boolean, default: true}
+  differ_stack: {type: [Map], required: true}
 })
 
-const TaskPatch = model("TaskPatch", schema);
+const DifferStack = model("DifferStack", schema);
 
-export default TaskPatch;
+export default DifferStack;
