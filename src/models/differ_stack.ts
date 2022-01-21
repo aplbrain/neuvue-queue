@@ -1,9 +1,8 @@
 import { model, Schema } from "mongoose";
 
-// A task patch is a single action that a user makes while completing a task in ngl
-// Examples include moving the view and adding a point
-// Ngl saves task patches in viewer.differ.stack
-// Here we save them for analysis
+// Neuroglancer saves differ stack in viewer.differ.stack
+// Contains all information about state changes during a single session
+// Here we save them for downstream analysis
 
 const schema = new Schema({
   active: {type: Boolean, default: true},
