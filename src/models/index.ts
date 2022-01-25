@@ -4,6 +4,7 @@ import Question from "./question";
 import Volume from "./volume";
 import Point from "./point";
 import Task from "./task";
+import DifferStack from "./differ_stack";
 
 export default {
     Graph,
@@ -11,5 +12,6 @@ export default {
     Question,
     Volume,
     Point,
-    Task
+    Task,
+    DifferStack
 };
