@@ -1,9 +1,14 @@
 version: "3"
 services:
   mongodb:
+    container_name: mongodb
     image: mongo:3.6
     restart: on-failure
+    volumes:
+      - mongo-data:/data/db
+      - /data/archive:/data/archive/
   neuvuequeue:
+    container_name: neuvuequeue
     build: "."
     ports:
       - 80:80
@@ -11,7 +16,9 @@ services:
     depends_on:
       - mongodb
     environment:
-      NEUVUEQUEUE_MONGODB_DATABASE: neuvuequeue
+      NEUVUEQUEUE_MONGODB_DATABASE: neuvue
       NEUVUEQUEUE_MONGODB_HOST: mongodb
       # AUTH0_DOMAIN: dev-oe-jgl7m.us.auth0.com
       # AUTH0_AUDIENCE: https://queue.neuvue.io
+volumes:
+  mongo-data:

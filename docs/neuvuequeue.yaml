@@ -190,6 +190,9 @@ components:
             - incomplete
         points:
           type: object
+        tags:
+          type: array
+          items: string
       required:
         - assignee
         - author
@@ -718,6 +721,48 @@ paths:
       responses:
         '200':
           description: The status has been changed. Returns the previous task object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+/tasks/{taskId}/tags:
+    patch:
+      tags:
+        - Tasks
+      summary: Set the tags of a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: task ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tags:
+                  type: array
+                  items: string
+      responses:
+        '200':
+          description: The tags have been changed. Returns the previous task object.
           content:
             application/json:
               schema:

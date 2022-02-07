@@ -171,8 +171,8 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             if (!_.isPlainObject(metadata)) {
                 return next(new BadRequestError("metadata must be a plain object"));
             }
-            const update: { [key: string]: any } = { metadata: req.body };
-            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
+            const update: { [key: string]: any } = { metadata: req.body.metadata };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -213,6 +213,122 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         };
     }
 
+    public setNamespace(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            const id = req.params.id;
+            
+            if (!_.isPlainObject(req.body)) {
+                return next(new BadRequestError("state must be a plain object"));
+            }
+            const update: { [key: string]: any } = { namespace: req.body.namespace };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else if (err.name === "ValidationError") {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
+
+    public setAssignee(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            const id = req.params.id;
+            
+            if (!_.isPlainObject(req.body)) {
+                return next(new BadRequestError("assignee must be a plain object"));
+            }
+            const update: { [key: string]: any } = { assignee: req.body.assignee };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else if (err.name === "ValidationError") {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
+
+    public setSegId(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            const id = req.params.id;
+            
+            if (!_.isPlainObject(req.body)) {
+                return next(new BadRequestError("Seg ID must be a plain object"));
+            }
+            const update: { [key: string]: any } = { seg_id: req.body.seg_id };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else if (err.name === "ValidationError") {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
+    public setTags(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            const id = req.params.id;
+            
+            if (!_.isPlainObject(req.body)) {
+                return next(new BadRequestError("tags must be a plain object"));
+            }
+            const update: { [key: string]: any } = { tags: req.body.tags };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else if (err.name === "ValidationError") {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
+
+    public activateTask(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            const id = req.params.id;
+            
+            const update: { [key: string]: any } = { active: true };
+            this.model.findByIdAndUpdate(id, update, (err, old) => {
+                if (err) {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${req.params.id} does not exist`));
+                    } else if (err.name === "ValidationError") {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                }
+                res.json(old);
+                res.end();
+            });
+        };
+    }
+
     public attachTo(root: string, server: Server, options?: TaskControllerOptions): void {
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
@@ -231,6 +347,12 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.patch(`${root}/:id/points`, auth0(true, writeScopes), this.appendPoint());
         server.patch(`${root}/:id/metadata`, auth0(true, writeScopes), this.setMetadata());
         server.patch(`${root}/:id/ng_state`, auth0(true, writeScopes), this.setNgState());
+
+        server.patch(`${root}/:id/namespace`, auth0(true, writeScopes), this.setNamespace());
+        server.patch(`${root}/:id/seg_id`, auth0(true, writeScopes), this.setSegId());
+        server.patch(`${root}/:id/assignee`, auth0(true, writeScopes), this.setAssignee());
+        server.patch(`${root}/:id/tags`, auth0(true, writeScopes), this.setTags());
+        server.patch(`${root}/:id/active`, auth0(true, writeScopes), this.activateTask());
         server.del(
             `${root}/:objectId/points/:pointId`, auth0(true, writeScopes), this.deactivatePoint(),
         );
