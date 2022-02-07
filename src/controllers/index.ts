@@ -11,8 +11,8 @@ import DifferStackController, { DifferStackControllerOptions } from "./differ_st
 
 export interface NeuvueQueueControllerOptions {
     point?: PointControllerOptions;
-    task?: TaskControllerOptions
-    auth?: AuthControllerOptions
+    task?: TaskControllerOptions;
+    auth?: AuthControllerOptions;
     task?: TaskControllerOptions;
     differ_stack?: DifferStackControllerOptions;
 }

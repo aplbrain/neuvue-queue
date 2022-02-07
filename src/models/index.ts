@@ -6,6 +6,6 @@ import DifferStack from "./differ_stack";
 export default {
     Point,
     Task,
-    Auth
+    Auth,
     DifferStack
 };
