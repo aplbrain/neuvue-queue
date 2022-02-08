@@ -123,7 +123,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             const update = { $push: { points: point } };
             const options = { runValidators: true };
 
-            this.model.findByIdAndUpdate(id, update, options, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, options, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -172,7 +172,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("metadata must be a plain object"));
             }
             const update: { [key: string]: any } = { metadata: req.body.metadata };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -221,7 +221,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("state must be a plain object"));
             }
             const update: { [key: string]: any } = { namespace: req.body.namespace };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -245,7 +245,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("assignee must be a plain object"));
             }
             const update: { [key: string]: any } = { assignee: req.body.assignee };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -269,7 +269,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("Seg ID must be a plain object"));
             }
             const update: { [key: string]: any } = { seg_id: req.body.seg_id };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -292,7 +292,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("tags must be a plain object"));
             }
             const update: { [key: string]: any } = { tags: req.body.tags };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -313,7 +313,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             const id = req.params.id;
             
             const update: { [key: string]: any } = { active: true };
-            this.model.findByIdAndUpdate(id, update, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));

@@ -5,7 +5,7 @@ import _ from "lodash/fp";
 import mongoose from "mongoose";
 import pino from "pino";
 import restify, { Server } from "restify";
-import corsMiddleware from "restify-cors-middleware";
+import corsMiddleware from "restify-cors-middleware2";
 import * as swagger from "swagger-ui-dist";
 
 import controllers from "./controllers";

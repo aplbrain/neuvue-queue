@@ -21,6 +21,11 @@ function wrapStaticSecretInCallback(secret:any) {
   };
 }
 
+interface JwtPayload {
+  permissions: string,
+  gty: string
+}
+
 export default function rjwt(options:any) {
   if (!options || !options.secret) throw new Error("secret should be set");
 
@@ -103,25 +108,27 @@ export default function rjwt(options:any) {
     }
 
     const idToken = jwt.decode(token, {complete: true});
-    if (idToken) {
-      console.log(idToken.payload.permissions)
-    }
+    // if (idToken) {
+    //   console.log(idToken.payload.permissions)
+    // }
+    
     if (idToken === null)
       return res.send(
         new Error("Invalid token provided")
       );
     // CODE JUSTIN WROTE TO CHECK IF THE PERMISSIONS OF THE TOKEN ARE RIGHT
     // THIS WAS NOT WRITTEN BY A PROFESSIONAL BACKEND DEV - juryrigged from express code
+    const payloadObj = idToken.payload as JwtPayload;
     if (checkScopes) {
       console.log(scope);
-      const hasExpectedScopes = idToken.payload.permissions.includes(scope);
+      const hasExpectedScopes = payloadObj.permissions.includes(scope);
       // something like this can be done to implement checking of multiple scopes
       // const hasExpectedScopes = expectedScopes.every(s => idToken.payload.permissions.includes(s));
 
       var client_credentials_flag = false;
       // This is to check if the grant type was client-credentials. These should always pass
-      if (idToken.payload.gty) {
-        if (idToken.payload.gty == "client-credentials") {
+      if (payloadObj.gty) {
+        if (payloadObj.gty == "client-credentials") {
           client_credentials_flag = true;
           console.log("Passed with client-credentials grant type")
         }
