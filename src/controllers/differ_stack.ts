@@ -5,6 +5,7 @@ import { Server } from "restify";
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
+import auth0 from '../lib/auth0';
 
 export interface DifferStackControllerOptions {
     detail?: DetailOptions;
