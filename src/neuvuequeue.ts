@@ -5,17 +5,20 @@ import _ from "lodash/fp";
 import mongoose from "mongoose";
 import pino from "pino";
 import restify, { Server } from "restify";
-import corsMiddleware from "restify-cors-middleware";
+import corsMiddleware from "restify-cors-middleware2";
 import * as swagger from "swagger-ui-dist";
 
 import controllers from "./controllers";
 import utils from "./utils";
 
+
 export interface NeuvueQueueConfig {
     mongodb: {
         database: string,
         host: string | string[],
-        options?: mongoose.ConnectionOptions,
+        // TODO This typing should be better, but the previous option of using 
+        // mongoose.ConnectionOptions is deprecated in the newest version of mongoose
+        options?: any,
         port: number | number[],
     };
     server: {
@@ -104,7 +107,6 @@ export default class NeuvueQueue {
         server.use(utils.middleware.log(this.logger));
         server.use(restify.plugins.jsonBodyParser());
         server.use(restify.plugins.queryParser());
-
         server.get("/", utils.handlers.serveFile(path.join(__dirname, "..", "public", "index.html")));
 
         server.get("/docs/*", restify.plugins.serveStatic({
@@ -118,16 +120,16 @@ export default class NeuvueQueue {
         }));
 
         controllers.attach(server, {
-            question: {
-                detail: { populate: ["volume"] },
-                query: { populate: ["volume"] },
+            point: {
+                detail: {},
+                query: {},
             },
         });
 
         server.on("restifyError", utils.middleware.logErrorCallback(this.logger));
 
         this.server = server;
-        await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
             this.server.listen(this.configuration.server.port, this.configuration.server.host, () => {
                 resolve();
             });

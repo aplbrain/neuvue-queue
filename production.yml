@@ -13,10 +13,10 @@ services:
     environment:
       NEUVUEQUEUE_MONGODB_DATABASE: neuvuequeue
       NEUVUEQUEUE_MONGODB_HOST: mongodb
-      VIRTUAL_HOST: queue.neuvue.io
-      LETSENCRYPT_HOST: queue.neuvue.io
+      VIRTUAL_HOST: dev-queue.neuvue.io
+      LETSENCRYPT_HOST: dev-queue.neuvue.io
     networks:
       - neuvue
 networks:
   neuvue:
-    external: true 
+    external: true

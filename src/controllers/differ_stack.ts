@@ -5,6 +5,7 @@ import { Server } from "restify";
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
+import auth0 from '../lib/auth0';
 
 export interface DifferStackControllerOptions {
     detail?: DetailOptions;
@@ -22,9 +23,12 @@ export default class DifferStackController extends mix(Controller).with(CRUDMixi
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
         }
+        const readScopes = 'read:tasks';
+        const writeScopes = 'update:tasks';
+
         server.get(root, this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
-        server.post(root, this.insert());
-        server.del(`${root}/:id`, this.deactivate());
+        server.post(root, auth0(true, writeScopes), this.insert());
+        server.del(`${root}/:id`, auth0(true, writeScopes), this.deactivate());
     }
 }

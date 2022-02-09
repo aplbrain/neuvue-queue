@@ -23,7 +23,7 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
 
     public deactivate(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next) => {
-            this.model.findByIdAndUpdate(req.params.id, { active: false }, (err) => {
+            this.model.findByIdAndUpdate(req.params.id, { active: false }, (err:Error) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -58,7 +58,7 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                 query = query.sort(sort.replace(/,/g, " "));
             }
 
-            query.exec((err, doc) => {
+            query.exec((err:any, doc:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -87,11 +87,11 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                     // errors very differently.
                     this.model.collection.insertMany(objs)
                         .then(() => this.afterInsert(objs))
-                        .then((objs) => {
+                        .then((objs:any) => {
                             res.status(201);
                             res.json(objs);
                         })
-                        .catch((err) => {
+                        .catch((err:Error) => {
                             next(err);
                         });
                 })
@@ -114,6 +114,8 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
             function makeLink(page: number, rel: string): string {
                 const path = url.parse(req.url as string, true);
                 path.query.p = page.toString();
+                // THIS LINE IS DEPRECATED - NEED HELP
+                // @ts-ignore
                 delete path.search; // required for url.format to re-generate querystring
                 const href = url.format(path);
                 return `<${href}>; rel="${rel}"`;
@@ -200,7 +202,7 @@ export const DecidableMixin = (superclass: any) => class extends superclass {
             const update = { $push: { decisions: decision } };
             const options = { runValidators: true };
 
-            this.model.findByIdAndUpdate(id, update, options, (err, old) => {
+            this.model.findByIdAndUpdate(id, update, options, (err:Error, old:any) => {
                 if (err) {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
@@ -223,14 +225,15 @@ export const DecidableMixin = (superclass: any) => class extends superclass {
 
             const query = { "_id": objId, "decisions._id": decisionId };
             const update = { $set: { "decisions.$.active": false } };
-
-            this.model.findOneAndUpdate(query, update, (err) => {
-                if (err) {
-                    return next(err);
-                }
+            try {
+                this.model.findOneAndUpdate(query, update);
                 res.status(204);
                 res.end();
-            });
+                
+            }   catch(err) {
+                res.status(500);
+                return next(err);
+            }
         };
     }
 };
