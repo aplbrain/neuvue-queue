@@ -5,7 +5,6 @@ import { BadRequestError, NotFoundError } from "restify-errors";
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
-import auth0 from '../lib/auth0';
 
 
 export interface TaskControllerOptions {
@@ -338,23 +337,23 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
 
         server.get(root, this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
-        server.post(root, auth0(true, writeScopes), this.insert());
-        server.del(`${root}/:id`, auth0(true, writeScopes),this.deactivate());
-        server.patch(`${root}/:id/instructions`, auth0(true, writeScopes), this.setInstructions());
-        server.patch(`${root}/:id/priority`, auth0(true, writeScopes), this.setPriority());
-        server.patch(`${root}/:id/duration`, auth0(true, writeScopes), this.incDuration());
-        server.patch(`${root}/:id/status`, auth0(true, writeScopes), this.setStatus());
-        server.patch(`${root}/:id/points`, auth0(true, writeScopes), this.appendPoint());
-        server.patch(`${root}/:id/metadata`, auth0(true, writeScopes), this.setMetadata());
-        server.patch(`${root}/:id/ng_state`, auth0(true, writeScopes), this.setNgState());
+        server.post(root,  this.insert());
+        server.del(`${root}/:id`, this.deactivate());
+        server.patch(`${root}/:id/instructions`,  this.setInstructions());
+        server.patch(`${root}/:id/priority`,  this.setPriority());
+        server.patch(`${root}/:id/duration`,  this.incDuration());
+        server.patch(`${root}/:id/status`,  this.setStatus());
+        server.patch(`${root}/:id/points`,  this.appendPoint());
+        server.patch(`${root}/:id/metadata`,  this.setMetadata());
+        server.patch(`${root}/:id/ng_state`,  this.setNgState());
 
-        server.patch(`${root}/:id/namespace`, auth0(true, writeScopes), this.setNamespace());
-        server.patch(`${root}/:id/seg_id`, auth0(true, writeScopes), this.setSegId());
-        server.patch(`${root}/:id/assignee`, auth0(true, writeScopes), this.setAssignee());
-        server.patch(`${root}/:id/tags`, auth0(true, writeScopes), this.setTags());
-        server.patch(`${root}/:id/active`, auth0(true, writeScopes), this.activateTask());
+        server.patch(`${root}/:id/namespace`,  this.setNamespace());
+        server.patch(`${root}/:id/seg_id`,  this.setSegId());
+        server.patch(`${root}/:id/assignee`,  this.setAssignee());
+        server.patch(`${root}/:id/tags`,  this.setTags());
+        server.patch(`${root}/:id/active`,  this.activateTask());
         server.del(
-            `${root}/:objectId/points/:pointId`, auth0(true, writeScopes), this.deactivatePoint(),
+            `${root}/:objectId/points/:pointId`,  this.deactivatePoint(),
         );
     }
 }

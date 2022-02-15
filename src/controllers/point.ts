@@ -5,8 +5,6 @@ import { Server } from "restify";
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DecidableMixin, DetailOptions, QueryOptions } from "./mixins";
-import auth0 from '../lib/auth0';
-// import requiredScopes from '../lib/required-scopes';
 
 export interface PointControllerOptions {
     detail?: DetailOptions;
@@ -24,11 +22,10 @@ export default class PointController extends mix(Controller).with(CRUDMixin, Dec
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
         }
-        const writeScopes = 'update:points';
 
         server.get(root, this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
-        server.post(root, auth0(true, writeScopes), this.insert());
+        server.post(root, this.insert());
         server.del(`${root}/:id`, this.deactivate());
     }
 }
