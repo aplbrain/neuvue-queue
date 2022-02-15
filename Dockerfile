@@ -2,7 +2,7 @@ FROM node:16.10-alpine
 LABEL maintainer "Daniel Xenes <daniel.xenes@jhuapl.edu>"
 
 RUN apk add --no-cache su-exec tini
-EXPOSE 80
+EXPOSE 9005
 ENV NODE_CONFIG_DIR=/etc/neuvuequeue
 VOLUME [ "/etc/neuvuequeue" ]
 
