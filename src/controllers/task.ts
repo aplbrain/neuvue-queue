@@ -35,7 +35,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 update.closed = Date.now();
             }
             
-            if (conditions) {
+            if (!_.isEmpty(conditions)) {
                 this.model.findOneAndUpdate(conditions, update, (err:any, old:any) => {
                     if (err) {
                         if (err.name === "DocumentNotFoundError") {
