@@ -23,27 +23,44 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         return (req: Request, res: Response, next: Next): void => {
 
             const update: { [key: string]: any } = { status: req.body.status };
-
+            const conditions: { [key: string]: any } = {}
             if (update.status === "pending") {
                 update.closed = null;
                 update.opened = null;
             } else if (update.status === "open") {
+                conditions._id = req.body.id;
+                conditions.opened = null;
                 update.opened = Date.now();
             } else if (update.status === "closed" || update.status === "errored") {
                 update.closed = Date.now();
             }
-
-            this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
-                if (err) {
-                    if (err.name === "DocumentNotFoundError") {
-                        return next(new NotFoundError(`${req.params.id} does not exist`));
-                    } else {
-                        return next(err);
+            
+            if (conditions) {
+                this.model.findOneAndUpdate(conditions, update, (err:any, old:any) => {
+                    if (err) {
+                        if (err.name === "DocumentNotFoundError") {
+                            return next(new NotFoundError(`${req.params.id} does not exist`));
+                        } else {
+                            return next(err);
+                        }
                     }
-                }
-                res.json(old);
-                res.end();
-            });
+                    res.json(old);
+                    res.end();
+                });
+            }
+            else {
+                this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
+                    if (err) {
+                        if (err.name === "DocumentNotFoundError") {
+                            return next(new NotFoundError(`${req.params.id} does not exist`));
+                        } else {
+                            return next(err);
+                        }
+                    }
+                    res.json(old);
+                    res.end();
+                });
+            }
         };
     }
 
