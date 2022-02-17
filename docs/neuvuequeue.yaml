@@ -5,7 +5,7 @@ info:
   version: 0.4.0
 
 servers:
-  - url: https://localhost:80/
+  - url: https://queue.neuvue.io/
     description: Main development server.
 
 components:
@@ -118,6 +118,8 @@ components:
             type: number
           minItems: 3
           maxItems: 3
+        resolution:
+          type: number
         created:
           type: integer
           minimum: 0
@@ -136,10 +138,15 @@ components:
         - created
         - namespace
         - type
-        - volume
     Auth:
       type: object
       properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        submitted:
+          type: integer
         code:
           type: string
       required:
@@ -183,23 +190,43 @@ components:
             - errored
             - open
             - pending
-        neuron_status:
+        seg_id:
           type: string
-          enum:
-            - complete
-            - incomplete
+        ng_state:
+          type: string
         points:
-          type: object
+          type: array
+          items: 
+            type: string
+          minItems: 0
         tags:
           type: array
-          items: string
+          items: 
+            type: string
+          minItems: 0
       required:
         - assignee
         - author
         - instructions
         - namespace
         - priority
-        - duration
+    Differ Stack:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        task_id:
+          type: string
+        differ_stack:
+          type: array
+          items: 
+            type: object
+          minItems: 0
+      required:
+        - task_id
+        - differ_stack
 
   securitySchemes:
     bearerAuth:
@@ -759,7 +786,8 @@ paths:
               properties:
                 tags:
                   type: array
-                  items: string
+                  items: 
+                    type: string
       responses:
         '200':
           description: The tags have been changed. Returns the previous task object.
