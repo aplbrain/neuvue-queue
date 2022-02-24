@@ -27,7 +27,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             if (update.status === "pending") {
                 update.closed = null;
                 update.opened = null;
-            } else if (update.status === "open") {
+            } else if (update.status === "open" && req.body.overwrite_opened) {
                 update.opened = Date.now();
             } else if (update.status === "closed" || update.status === "errored") {
                 update.closed = Date.now();
