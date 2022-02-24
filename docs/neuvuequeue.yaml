@@ -230,6 +230,16 @@ components:
       required:
         - task_id
         - differ_stack
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      required:
+        - code
+        - message
 
   securitySchemes:
     bearerAuth:
@@ -812,3 +822,123 @@ paths:
             $ref: '#/components/responses/NotFound'
           '500':
             $ref: '#/components/responses/InternalServerError'
+  /differstacks:
+    get:
+      tags:
+        - Differ Stacks
+      summary: Get all differ stacks 
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/queryParam'
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/populateParam'
+        - $ref: '#/components/parameters/selectParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: A JSON array of differ stack objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Differ Stack'
+        '400':
+          description: Bad request. The query param q must be a valid JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Differ Stacks
+      summary: Creates one or more differ stacks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Differ Stack'
+      responses:
+        '201':
+          description: Created. A JSON array of differ stack objects with IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Differ Stack'
+        '400':
+          description: Bad request. One or more of the differ stack objects are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /differstacks/{differStackId}:
+    parameters:
+      - name: differStackId
+        in: path
+        required: true
+        description: Differ Stack ID.
+        schema:
+          type: string
+    delete:
+      tags:
+        - Differ Stacks
+      summary: Deactivates a differ stack by ID.
+      responses:
+        '204':
+          description: The differ stack has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Differ Stacks
+      summary: Returns a differ stack by ID.
+      responses:
+        '200':
+          description: A differ stack object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'

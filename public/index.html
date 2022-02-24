@@ -38,6 +38,7 @@
     <script>
     window.onload = function() {
       // Begin Swagger UI call region
+      const prodUrl = "queue.neuvue.io"
       const ui = SwaggerUIBundle({
         url: window.location.origin + "/docs/neuvuequeue.yaml",
         dom_id: '#swagger-ui',
@@ -55,9 +56,17 @@
           const host = window.location.host.toLowerCase();
           // Get swagger yaml as json object
           let spec = ui.specSelectors.specJson().toJS();
-          // Filter out the server we are not currently hosting from
+          // Filter out localhost if we are on prod
           let servers = spec.servers.filter((item) => {
-            return item.url.toLowerCase().includes(host.toLowerCase());
+            const itemUrl = item.url.toLowerCase();
+            const hostname = host.toLowerCase();
+            if (itemUrl.includes(prodUrl)) {
+              return true;
+            } else if (itemUrl.includes(hostname)) {
+              return true;
+            } else {
+              return false;
+            } 
           });
           spec.servers = servers;
           ui.specActions.updateJsonSpec(spec);
