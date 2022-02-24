@@ -49,7 +49,19 @@
         plugins: [
           SwaggerUIBundle.plugins.DownloadUrl
         ],
-        layout: "StandaloneLayout"
+        layout: "StandaloneLayout",
+        onComplete: function () {
+          // Get hostname
+          const host = window.location.host.toLowerCase();
+          // Get swagger yaml as json object
+          let spec = ui.specSelectors.specJson().toJS();
+          // Filter out the server we are not currently hosting from
+          let servers = spec.servers.filter((item) => {
+            return item.url.toLowerCase().includes(host.toLowerCase());
+          });
+          spec.servers = servers;
+          ui.specActions.updateJsonSpec(spec);
+        },
       })
       // End Swagger UI call region
 

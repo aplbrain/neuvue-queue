@@ -4,9 +4,12 @@ info:
   description: NeuVue Queue REST API documentation.
   version: 0.4.0
 
+# OnComplete function in index.html will figure out which server should be displayed here
 servers:
   - url: https://queue.neuvue.io/
     description: Main development server.
+  - url: http://localhost/
+    description: Local development server.
 
 components:
   parameters:
@@ -244,8 +247,8 @@ paths:
         - Points
       summary: Get paginated list of Points.
       parameters:
-        - $ref: '#/components/parameters/queryParam'
         - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/queryParam'
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/populateParam'
         - $ref: '#/components/parameters/selectParam'
@@ -365,7 +368,7 @@ paths:
       summary: Endpoint for receiving access tokens
       parameters:
         - $ref: '#/components/parameters/queryParam'
-        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/populateParam'
         - $ref: '#/components/parameters/selectParam'
@@ -485,7 +488,7 @@ paths:
       summary: Get paginated list of tasks.
       parameters:
         - $ref: '#/components/parameters/queryParam'
-        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/populateParam'
         - $ref: '#/components/parameters/selectParam'
@@ -766,46 +769,46 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-/tasks/{taskId}/tags:
-    patch:
-      tags:
-        - Tasks
-      summary: Set the tags of a task
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          description: task ID.
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
+  /tasks/{taskId}/tags:
+      patch:
+        tags:
+          - Tasks
+        summary: Set the tags of a task
+        parameters:
+          - name: taskId
+            in: path
+            required: true
+            description: task ID.
             schema:
-              type: object
-              properties:
-                tags:
-                  type: array
-                  items: 
-                    type: string
-      responses:
-        '200':
-          description: The tags have been changed. Returns the previous task object.
+              type: string
+        requestBody:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
-        '400':
-          description: Bad request. The ID is invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items: 
+                      type: string
+        responses:
+          '200':
+            description: The tags have been changed. Returns the previous task object.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Task'
+          '400':
+            description: Bad request. The ID is invalid.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '401':
+            $ref: '#/components/responses/Unauthorized'
+          '403':
+            $ref: '#/components/responses/Forbidden'
+          '404':
+            $ref: '#/components/responses/NotFound'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
