@@ -26,7 +26,7 @@ export default class DifferStackController extends mix(Controller).with(CRUDMixi
         const readScopes = 'read:tasks';
         const writeScopes = 'update:tasks';
 
-        server.get(root, this.query(_.get("query", options)));
+        server.get(root, auth0(true, readScopes), this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
         server.post(root, auth0(true, writeScopes), this.insert());
         server.del(`${root}/:id`, auth0(true, writeScopes), this.deactivate());

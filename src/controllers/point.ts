@@ -24,9 +24,11 @@ export default class PointController extends mix(Controller).with(CRUDMixin, Dec
         if (root.endsWith("/")) {
             root = root.substring(0, root.length - 1);
         }
+
+        const readScopes = 'read:points';
         const writeScopes = 'update:points';
 
-        server.get(root, this.query(_.get("query", options)));
+        server.get(root, auth0(true, readScopes), this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
         server.post(root, auth0(true, writeScopes), this.insert());
         server.del(`${root}/:id`, this.deactivate());
