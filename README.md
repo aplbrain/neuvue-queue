@@ -29,3 +29,30 @@ node ./build/bin/neuvue-queue
 ## Production Deployment
 
 For deploying neuvue-queue in a production environment, see [automatizar](https://github.com/aplbrain/automatizar).
+
+## Schema Changelog 
+
+`Task`
+
+**v0** 
+```
+    active
+    assignee
+    author
+    closed
+    created
+    instructions
+    metadata
+    namespace
+    opened
+    priority
+    duration
+    status
+    seg_id
+    ng_state
+    points
+```
+
+**v1**  
+
+Added `tags` field.
