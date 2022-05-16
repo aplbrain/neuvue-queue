@@ -11,11 +11,10 @@ const schema = new Schema({
             },
         },
     },
-    source: { type: String, required: true },
-    target: { type: String, required: true },
-    weight: { type: Number, required: true },
-    created: { type: Number, default: null, min: 0 },
-    merge_points: {type: [[Number]], default: []}
+    seg_id: { type: String, required: true },
+    merges: { type: Map, of: Schema.Types.Mixed, default: {}},
+    metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
+    created: { type: Number, default: null, min: 0 }
 });
 
 const AgentsJob = model("AgentsJob", schema);
