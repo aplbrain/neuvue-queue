@@ -69,6 +69,6 @@
     "restify": "^8.6.0",
     "restify-cors-middleware2": "^2.1.2",
     "restify-errors": "^8.0.2",
-    "swagger-ui-dist": "^3.20.1"
+    "swagger-ui-dist": "^4.5.2"
   }
 }

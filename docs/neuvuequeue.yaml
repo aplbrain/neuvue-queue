@@ -4,9 +4,12 @@ info:
   description: NeuVue Queue REST API documentation.
   version: 0.4.0
 
+# OnComplete function in index.html will figure out which server should be displayed here
 servers:
-  - url: https://localhost:80/
+  - url: https://queue.neuvue.io/
     description: Main development server.
+  - url: http://localhost/
+    description: Local development server.
 
 components:
   parameters:
@@ -118,6 +121,8 @@ components:
             type: number
           minItems: 3
           maxItems: 3
+        resolution:
+          type: number
         created:
           type: integer
           minimum: 0
@@ -136,10 +141,15 @@ components:
         - created
         - namespace
         - type
-        - volume
     Auth:
       type: object
       properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        submitted:
+          type: integer
         code:
           type: string
       required:
@@ -183,23 +193,53 @@ components:
             - errored
             - open
             - pending
-        neuron_status:
+        seg_id:
           type: string
-          enum:
-            - complete
-            - incomplete
+        ng_state:
+          type: string
         points:
-          type: object
+          type: array
+          items: 
+            type: string
+          minItems: 0
         tags:
           type: array
-          items: string
+          items: 
+            type: string
+          minItems: 0
       required:
         - assignee
         - author
         - instructions
         - namespace
         - priority
-        - duration
+    Differ Stack:
+      type: object
+      properties:
+        _id:
+          type: string
+        active:
+          type: boolean
+        task_id:
+          type: string
+        differ_stack:
+          type: array
+          items: 
+            type: object
+          minItems: 0
+      required:
+        - task_id
+        - differ_stack
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      required:
+        - code
+        - message
 
   securitySchemes:
     bearerAuth:
@@ -217,8 +257,8 @@ paths:
         - Points
       summary: Get paginated list of Points.
       parameters:
-        - $ref: '#/components/parameters/queryParam'
         - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/queryParam'
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/populateParam'
         - $ref: '#/components/parameters/selectParam'
@@ -338,7 +378,7 @@ paths:
       summary: Endpoint for receiving access tokens
       parameters:
         - $ref: '#/components/parameters/queryParam'
-        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/populateParam'
         - $ref: '#/components/parameters/selectParam'
@@ -458,7 +498,7 @@ paths:
       summary: Get paginated list of tasks.
       parameters:
         - $ref: '#/components/parameters/queryParam'
-        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/PageParam'
         - $ref: '#/components/parameters/pageSizeParam'
         - $ref: '#/components/parameters/populateParam'
         - $ref: '#/components/parameters/selectParam'
@@ -739,34 +779,155 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-/tasks/{taskId}/tags:
-    patch:
-      tags:
-        - Tasks
-      summary: Set the tags of a task
-      parameters:
-        - name: taskId
-          in: path
-          required: true
-          description: task ID.
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
+  /tasks/{taskId}/tags:
+      patch:
+        tags:
+          - Tasks
+        summary: Set the tags of a task
+        parameters:
+          - name: taskId
+            in: path
+            required: true
+            description: task ID.
             schema:
-              type: object
-              properties:
-                tags:
-                  type: array
-                  items: string
-      responses:
-        '200':
-          description: The tags have been changed. Returns the previous task object.
+              type: string
+        requestBody:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Task'
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items: 
+                      type: string
+        responses:
+          '200':
+            description: The tags have been changed. Returns the previous task object.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Task'
+          '400':
+            description: Bad request. The ID is invalid.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '401':
+            $ref: '#/components/responses/Unauthorized'
+          '403':
+            $ref: '#/components/responses/Forbidden'
+          '404':
+            $ref: '#/components/responses/NotFound'
+          '500':
+            $ref: '#/components/responses/InternalServerError'
+  /differstacks:
+    get:
+      tags:
+        - Differ Stacks
+      summary: Get all differ stacks 
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/queryParam'
+        - $ref: '#/components/parameters/pageSizeParam'
+        - $ref: '#/components/parameters/populateParam'
+        - $ref: '#/components/parameters/selectParam'
+        - $ref: '#/components/parameters/sortParam'
+      responses:
+        '200':
+          description: A JSON array of differ stack objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Differ Stack'
+        '400':
+          description: Bad request. The query param q must be a valid JSON object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Differ Stacks
+      summary: Creates one or more differ stacks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Differ Stack'
+      responses:
+        '201':
+          description: Created. A JSON array of differ stack objects with IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Differ Stack'
+        '400':
+          description: Bad request. One or more of the differ stack objects are invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /differstacks/{differStackId}:
+    parameters:
+      - name: differStackId
+        in: path
+        required: true
+        description: Differ Stack ID.
+        schema:
+          type: string
+    delete:
+      tags:
+        - Differ Stacks
+      summary: Deactivates a differ stack by ID.
+      responses:
+        '204':
+          description: The differ stack has been deactivated.
+        '400':
+          description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Differ Stacks
+      summary: Returns a differ stack by ID.
+      responses:
+        '200':
+          description: A differ stack object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Point'
         '400':
           description: Bad request. The ID is invalid.
           content:
