@@ -23,7 +23,7 @@ export default class DifferStackController extends mix(Controller).with(CRUDMixi
             root = root.substring(0, root.length - 1);
         }
 
-        server.get(root, auth0(true, readScopes), this.query(_.get("query", options)));
+        server.get(root, this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
         server.post(root, this.insert());
         server.del(`${root}/:id`, this.deactivate());

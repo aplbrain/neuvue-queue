@@ -334,7 +334,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         const readScopes = 'read:tasks';
         const writeScopes = 'update:tasks';
 
-        server.get(root, auth0(true, readScopes), this.query(_.get("query", options)));
+        server.get(root, this.query(_.get("query", options)));
         server.get(`${root}/:id`, this.detail(_.get("detail", options)));
         server.post(root,  this.insert());
         server.del(`${root}/:id`, this.deactivate());
