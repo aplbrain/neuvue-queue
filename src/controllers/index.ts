@@ -28,7 +28,7 @@ function attach(server: Server, options?: NeuvueQueueControllerOptions): void {
     tasks.attachTo("/tasks", server, _.get("task", options));
     auth.attachTo("/auth", server, _.get("auth", options));
     differ_stack.attachTo("/differstacks", server, _.get("differstack", options));
-    agents_job.attachTo("/agentsjobs", server, _.get("agentsjob", options));
+    agents_job.attachTo("/agents", server, _.get("agentsjob", options));
 }
 
 export default {
