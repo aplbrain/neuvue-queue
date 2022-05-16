@@ -6,7 +6,6 @@ import AgentsJob from "./agents_job";
 export default {
     Point,
     Task,
-    Auth,
     DifferStack,
     AgentsJob
 };
