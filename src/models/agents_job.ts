@@ -12,9 +12,9 @@ const schema = new Schema({
         },
     },
     seg_id: { type: String, required: true },
-    nucleus_id: { type: String, required: true },
+    nucleus_id: { type: String, default: null},
     merges: { type: Map, of: Schema.Types.Mixed, default: {}},
-    metadata: { type: Map, of: Schema.Types.Mixed, default: {} },
+    metadata: { type: Map, of: Schema.Types.Mixed, default: {}},
     created: { type: Number, default: null, min: 0 }
 });
 

@@ -6,7 +6,6 @@ import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
 
-
 export interface AgentsJobControllerOptions {
     detail?: DetailOptions;
     query?: QueryOptions;
