@@ -15,7 +15,8 @@ const schema = new Schema({
     nucleus_id: { type: String, default: null},
     merges: { type: Map, of: Schema.Types.Mixed, default: {}},
     metadata: { type: Map, of: Schema.Types.Mixed, default: {}},
-    created: { type: Number, default: null, min: 0 }
+    created: { type: Number, default: null, min: 0 },
+    namespace: { type: String, default: null }
 });
 
 const AgentsJob = model("AgentsJob", schema);
