@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 
 const schema = new Schema({
     active: { type: Boolean, default: true },
-    assignee: { type: String, required: true },
+    assignee: { type: String, required: true, index: true },
     author: { type: String, required: true },
     closed: { type: Number, default: null, min: 0 },
     created: { type: Number, default: Date.now, min: 0 },
