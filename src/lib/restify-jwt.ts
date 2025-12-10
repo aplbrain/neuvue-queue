@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import unless from "express-unless";
 import async from "async";
+import { BadRequestError } from "restify-errors";
 
 // import InvalidCredentialsError from "restify-errors/InvalidCredentialsError";
 // import UnauthorizedError from "restify-errors/UnauthorizedError";
@@ -22,7 +23,8 @@ function wrapStaticSecretInCallback(secret:any) {
 }
 
 interface JwtPayload {
-  permissions: string,
+  permissions: string[],
+  allowed_namespaces: string[],
   gty: string
 }
 
@@ -120,7 +122,21 @@ export default function rjwt(options:any) {
     // THIS WAS NOT WRITTEN BY A PROFESSIONAL BACKEND DEV - juryrigged from express code
     const payloadObj = idToken.payload as JwtPayload;
     if (checkScopes) {
-      console.log(scope);
+
+      // Parse namespace from request to determine if user is authorized
+      // Hannah note: this namespace clause will work for queries which include sieve=namespace. need to figure out best way to do this for other kinds of queries...
+      let namespace = "";
+      if (req.query.q) {
+          try {
+              const q = JSON.parse(req.query.q);
+              namespace = q.namespace;
+          } catch (err) {
+              return next(new BadRequestError("query is not a valid JSON object"));
+          }
+      }
+      const allowedNamespaces = payloadObj.allowed_namespaces;
+      const hasAllowedNamespace = allowedNamespaces.includes(namespace) || allowedNamespaces.includes("all");
+
       const hasExpectedScopes = payloadObj.permissions.includes(scope);
       // something like this can be done to implement checking of multiple scopes
       // const hasExpectedScopes = expectedScopes.every(s => idToken.payload.permissions.includes(s));
@@ -133,7 +149,7 @@ export default function rjwt(options:any) {
           console.log("Passed with client-credentials grant type")
         }
       }
-      if (!hasExpectedScopes && !client_credentials_flag) {
+      if ((!hasExpectedScopes || !hasAllowedNamespace) && !client_credentials_flag) {
         console.log("Token valid but insufficient permissions")
         return res.send(
           new Error(
