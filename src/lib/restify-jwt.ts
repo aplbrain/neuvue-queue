@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import unless from "express-unless";
 import async from "async";
-import { BadRequestError } from "restify-errors";
 
 // import InvalidCredentialsError from "restify-errors/InvalidCredentialsError";
 // import UnauthorizedError from "restify-errors/UnauthorizedError";
@@ -123,19 +122,8 @@ export default function rjwt(options:any) {
     const payloadObj = idToken.payload as JwtPayload;
     if (checkScopes) {
 
-      // Parse namespace from request to determine if user is authorized
-      // Hannah note: this namespace clause will work for queries which include sieve=namespace. need to figure out best way to do this for other kinds of queries...
-      let namespace = "";
-      if (req.query.q) {
-          try {
-              const q = JSON.parse(req.query.q);
-              namespace = q.namespace;
-          } catch (err) {
-              return next(new BadRequestError("query is not a valid JSON object"));
-          }
-      }
       const allowedNamespaces = payloadObj.allowed_namespaces;
-      const hasAllowedNamespace = allowedNamespaces.includes(namespace) || allowedNamespaces.includes("all");
+      req.params.allowedNamespaces = allowedNamespaces;
 
       const hasExpectedScopes = payloadObj.permissions.includes(scope);
       // something like this can be done to implement checking of multiple scopes
@@ -149,7 +137,7 @@ export default function rjwt(options:any) {
           console.log("Passed with client-credentials grant type")
         }
       }
-      if ((!hasExpectedScopes || !hasAllowedNamespace) && !client_credentials_flag) {
+      if (!hasExpectedScopes && !client_credentials_flag) {
         console.log("Token valid but insufficient permissions")
         return res.send(
           new Error(
@@ -164,7 +152,7 @@ export default function rjwt(options:any) {
     console.log("Token valid")
     async.parallel(
       [
-        function (callback) {
+        function (callback:any) {
           const arity = secretCallback.length;
           if (arity === 4) {
             secretCallback(
@@ -178,11 +166,11 @@ export default function rjwt(options:any) {
             secretCallback(req, idToken.payload, callback);
           }
         },
-        function (callback) {
+        function (callback:any) {
           isRevokedCallback(req, idToken.payload, callback);
         }
       ],
-      function (err, results:any) {
+      function (err:any, results:any) {
         if (err) {
           return res.send(err);
         }

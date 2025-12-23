@@ -1,14 +1,21 @@
 import rjwt from "./restify-jwt";
 import jwksRsa from "jwks-rsa";
 
+const jwks = jwksRsa({
+  cache: true,
+  rateLimit: true,
+  jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+});
+
 const tokenGuard = rjwt({
   // Fetch the signing key based on the KID in the header and
   // the singing keys provided by the JWKS endpoint.
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`
-  }),
+  secret: (req: any, header: any, _payload: any, cb: any) => {
+    jwks.getSigningKey(header.kid, (err: any, key: any) => {
+      if (err) return cb(err);
+      cb(null, key.getPublicKey());
+    });
+  },
 
   // Validate the audience and the issuer.
   audience: process.env.AUTH0_AUDIENCE,
