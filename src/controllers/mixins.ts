@@ -230,7 +230,6 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
 export const DecidableMixin = (superclass: any) => class extends superclass {
     protected model: Model<Document>;
 
-    // TODO
     public appendDecision(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next): void => {
             const id = req.params.id;

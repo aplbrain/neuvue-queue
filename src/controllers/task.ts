@@ -1,7 +1,7 @@
 import _ from "lodash/fp";
 import { Document, Model } from "mongoose";
 import { Next, Request, Response, Server } from "restify";
-import { BadRequestError, NotFoundError } from "restify-errors";
+import { BadRequestError, NotFoundError, ForbiddenError } from "restify-errors";
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
@@ -235,19 +235,23 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new BadRequestError("state must be a plain object"));
             }
             const update: { [key: string]: any } = { namespace: req.body.namespace };
-            // TODO
-            this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                if (err) {
-                    if (err.name === "DocumentNotFoundError") {
-                        return next(new NotFoundError(`${req.params.id} does not exist`));
-                    } else if (err.name === "ValidationError") {
-                        return next(new BadRequestError(err.message));
-                    } else {
-                        return next(err);
+            if (!this.namespaceAllowed(req, req.body.namespace)) {
+                return next(new ForbiddenError("Insufficient namespace permissions"));
+            }
+            this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
+                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
+                    if (err) {
+                        if (err.name === "DocumentNotFoundError") {
+                            return next(new NotFoundError(`${req.params.id} does not exist`));
+                        } else if (err.name === "ValidationError") {
+                            return next(new BadRequestError(err.message));
+                        } else {
+                            return next(err);
+                        }
                     }
-                }
-                res.json(old);
-                res.end();
+                    res.json(old);
+                    res.end();
+                });
             });
         };
     }
