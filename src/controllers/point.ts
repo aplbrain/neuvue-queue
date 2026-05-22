@@ -26,16 +26,18 @@ export default class PointController extends mix(Controller).with(CRUDMixin, Dec
 
             const update: { [key: string]: any } = { agents_status: req.body.agents_status };
 
-            this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
-                if (err) {
-                    if (err.name === "DocumentNotFoundError") {
-                        return next(new NotFoundError(`${req.params.id} does not exist`));
-                    } else {
-                        return next(err);
+            this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
+                this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
+                    if (err) {
+                        if (err.name === "DocumentNotFoundError") {
+                            return next(new NotFoundError(`${req.params.id} does not exist`));
+                        } else {
+                            return next(err);
+                        }
                     }
-                }
-                res.json(old);
-                res.end();
+                    res.json(old);
+                    res.end();
+                });
             });
         };
     }

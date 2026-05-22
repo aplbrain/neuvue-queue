@@ -22,7 +22,8 @@ function wrapStaticSecretInCallback(secret:any) {
 }
 
 interface JwtPayload {
-  permissions: string,
+  permissions: string[],
+  allowed_namespaces: string[],
   gty: string
 }
 
@@ -120,7 +121,10 @@ export default function rjwt(options:any) {
     // THIS WAS NOT WRITTEN BY A PROFESSIONAL BACKEND DEV - juryrigged from express code
     const payloadObj = idToken.payload as JwtPayload;
     if (checkScopes) {
-      console.log(scope);
+
+      const allowedNamespaces = payloadObj.allowed_namespaces;
+      req.params.allowedNamespaces = allowedNamespaces;
+
       const hasExpectedScopes = payloadObj.permissions.includes(scope);
       // something like this can be done to implement checking of multiple scopes
       // const hasExpectedScopes = expectedScopes.every(s => idToken.payload.permissions.includes(s));
@@ -148,7 +152,7 @@ export default function rjwt(options:any) {
     console.log("Token valid")
     async.parallel(
       [
-        function (callback) {
+        function (callback:any) {
           const arity = secretCallback.length;
           if (arity === 4) {
             secretCallback(
@@ -162,11 +166,11 @@ export default function rjwt(options:any) {
             secretCallback(req, idToken.payload, callback);
           }
         },
-        function (callback) {
+        function (callback:any) {
           isRevokedCallback(req, idToken.payload, callback);
         }
       ],
-      function (err, results:any) {
+      function (err:any, results:any) {
         if (err) {
           return res.send(err);
         }

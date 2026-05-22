@@ -3,7 +3,7 @@ import url from "url";
 import _ from "lodash/fp";
 import { Document, Model } from "mongoose";
 import { Next, Request, Response } from "restify";
-import { BadRequestError, NotFoundError } from "restify-errors";
+import { BadRequestError, NotFoundError, ForbiddenError } from "restify-errors";
 
 export interface DetailOptions {
     populate?: string[];
@@ -21,18 +21,48 @@ export interface QueryOptions {
 export const CRUDMixin = (superclass: any) => class extends superclass {
     protected model: Model<Document>;
 
+    protected namespaceAllowed(req: Request, namespace?: string | null): boolean {
+        const allowedNamespaces = req.params.allowedNamespaces || [];
+        if (allowedNamespaces.includes("all")) return true;
+        else if (allowedNamespaces.includes(namespace)) return true;
+        else return false;
+    }
+    
+    protected ensureNamespaceAuthorizedForPatch(
+        req: Request,
+        next: Next,
+        id: string,
+        cb: () => void,
+    ): void {
+        this.model.findById(id, (err:any, doc:any) => {
+            if (err) {
+                if (err.name === "DocumentNotFoundError") {
+                    return next(new NotFoundError(`${id} does not exist`));
+                }
+                return next(err);
+            }
+            const namespace = doc.get("namespace") || undefined;
+            if (namespace && !this.namespaceAllowed(req, namespace)) {
+                return next(new ForbiddenError("Insufficient namespace permissions"));
+            }
+            cb();
+        });
+    }
+
     public deactivate(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next) => {
-            this.model.findByIdAndUpdate(req.params.id, { active: false }, (err:Error) => {
-                if (err) {
-                    if (err.name === "DocumentNotFoundError") {
-                        return next(new NotFoundError(`${req.params.id} does not exist`));
-                    } else {
-                        return next(err);
+            this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
+                this.model.findByIdAndUpdate(req.params.id, { active: false }, (err:Error) => {
+                    if (err) {
+                        if (err.name === "DocumentNotFoundError") {
+                            return next(new NotFoundError(`${req.params.id} does not exist`));
+                        } else {
+                            return next(err);
+                        }
                     }
-                }
-                res.status(204);
-                res.end();
+                    res.status(204);
+                    res.end();
+                });
             });
         };
     }
@@ -79,6 +109,12 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                 body = Array.of(body);
             }
             const documents = _.map((raw: object) => new this.model(raw), body);
+            for (const document of documents) {
+                const namespace = document.get("namespace") || undefined;
+                if (namespace && !this.namespaceAllowed(req, namespace)) {
+                    return next(new ForbiddenError("Insufficient namespace permissions"));
+                }
+            }
             Promise.all(_.map((doc: Document) => doc.validate(), documents))
                 .then(() => this.beforeInsert(documents))
                 .then((documents) => {
@@ -202,18 +238,20 @@ export const DecidableMixin = (superclass: any) => class extends superclass {
             const update = { $push: { decisions: decision } };
             const options = { runValidators: true };
 
-            this.model.findByIdAndUpdate(id, update, options, (err:Error, old:any) => {
-                if (err) {
-                    if (err.name === "DocumentNotFoundError") {
-                        return next(new NotFoundError(`${req.params.id} does not exist`));
-                    } else if (err.name === "ValidationError") {
-                        return next(new BadRequestError(err.message));
-                    } else {
-                        return next(err);
+            this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
+                this.model.findByIdAndUpdate(id, update, options, (err:Error, old:any) => {
+                    if (err) {
+                        if (err.name === "DocumentNotFoundError") {
+                            return next(new NotFoundError(`${req.params.id} does not exist`));
+                        } else if (err.name === "ValidationError") {
+                            return next(new BadRequestError(err.message));
+                        } else {
+                            return next(err);
+                        }
                     }
-                }
-                res.json(old);
-                res.end();
+                    res.json(old);
+                    res.end();
+                });
             });
         };
     }
@@ -225,15 +263,17 @@ export const DecidableMixin = (superclass: any) => class extends superclass {
 
             const query = { "_id": objId, "decisions._id": decisionId };
             const update = { $set: { "decisions.$.active": false } };
-            try {
-                this.model.findOneAndUpdate(query, update);
-                res.status(204);
-                res.end();
-                
-            }   catch(err) {
-                res.status(500);
-                return next(err);
-            }
+            this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
+                try {
+                    this.model.findOneAndUpdate(query, update);
+                    res.status(204);
+                    res.end();
+                    
+                }   catch(err) {
+                    res.status(500);
+                    return next(err);
+                }
+            });
         };
     }
 };
