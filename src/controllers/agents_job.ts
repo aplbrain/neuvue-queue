@@ -13,8 +13,8 @@ export interface AgentsJobControllerOptions {
 }
 
 export default class AgentsJobController extends mix(Controller).with(CRUDMixin) {
-    private model: Model<Document>;
-    constructor(model: Model<Document>) {
+    protected model: Model<any>;
+    constructor(model: Model<any>) {
         super();
         this.model = model;
     }

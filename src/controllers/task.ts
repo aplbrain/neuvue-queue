@@ -13,8 +13,8 @@ export interface TaskControllerOptions {
 }
 
 export default class TaskController extends mix(Controller).with(CRUDMixin) {
-    private model: Model<Document>;
-    constructor(model: Model<Document>) {
+    protected model: Model<any>;
+    constructor(model: Model<any>) {
         super();
         this.model = model;
     }
@@ -33,17 +33,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             }
 
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, req.params.id, update);
             });
         };
     }
@@ -58,17 +48,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             const update: { [key: string]: any } = { priority: req.body.priority };
 
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, req.params.id, update);
             });
         };
     }
@@ -83,17 +63,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             const update: { [key: string]: any } = { instructions: req.body.instructions };
 
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, req.params.id, update);
             });
         }
     }
@@ -106,17 +76,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             }
             const update = { $inc: {duration: req.body.duration}}
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, req.params.id, update);
             });
         };
     }
@@ -130,19 +90,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             const options = { runValidators: true };
 
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, options, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update, options);
             });
         };
     }
@@ -156,19 +104,19 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             const query = { "_id": objId, "points._id": pointId };
             const update = { $set: { "points.$.active": false } };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                try {
-                    this.model.findOneAndUpdate(query, update);
-                    res.status(204);
-                    res.end();
-                    
-                }   catch(err) {
-                    res.status(500);
-                    if (err.name === "DocumentNotFoundError") {
-                        return next(new NotFoundError(`${req.params.id} does not exist`));
-                    } else {
-                        return next(err);
-                    }
-                }
+                this.model.findOneAndUpdate(query, update)
+                    .then(() => {
+                        res.status(204);
+                        res.end();
+                    })
+                    .catch((err: any) => {
+                        res.status(500);
+                        if (err.name === "DocumentNotFoundError") {
+                            return next(new NotFoundError(`${req.params.id} does not exist`));
+                        } else {
+                            return next(err);
+                        }
+                    });
             });
         };
     }
@@ -183,19 +131,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             }
             const update: { [key: string]: any } = { metadata: req.body.metadata };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update);
             });
         };
     }
@@ -210,19 +146,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             }
             const update: { [key: string]: any } = { ng_state: req.body.ng_state };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update);
             });
         };
     }
@@ -239,19 +163,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
                 return next(new ForbiddenError("Insufficient namespace permissions"));
             }
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update);
             });
         };
     }
@@ -265,19 +177,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             }
             const update: { [key: string]: any } = { assignee: req.body.assignee };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update);
             });
         };
     }
@@ -291,19 +191,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             }
             const update: { [key: string]: any } = { seg_id: req.body.seg_id };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update);
             });
         };
     }
@@ -316,19 +204,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             }
             const update: { [key: string]: any } = { tags: req.body.tags };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update);
             });
         };
     }
@@ -339,19 +215,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
             
             const update: { [key: string]: any } = { active: true };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update);
             });
         };
     }

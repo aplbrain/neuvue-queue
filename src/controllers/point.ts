@@ -15,8 +15,8 @@ export interface PointControllerOptions {
 }
 
 export default class PointController extends mix(Controller).with(CRUDMixin, DecidableMixin) {
-    private model: Model<Document>;
-    constructor(model: Model<Document>) {
+    protected model: Model<any>;
+    constructor(model: Model<any>) {
         super();
         this.model = model;
     }
@@ -27,17 +27,7 @@ export default class PointController extends mix(Controller).with(CRUDMixin, Dec
             const update: { [key: string]: any } = { agents_status: req.body.agents_status };
 
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(req.params.id, update, (err:any, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, req.params.id, update);
             });
         };
     }

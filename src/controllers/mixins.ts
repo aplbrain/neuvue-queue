@@ -18,8 +18,10 @@ export interface QueryOptions {
     sort?: string[];
 }
 
+type AnyDocument = Document<any, any, any>;
+
 export const CRUDMixin = (superclass: any) => class extends superclass {
-    protected model: Model<Document>;
+    protected model!: Model<any>;
 
     protected namespaceAllowed(req: Request, namespace?: string | null): boolean {
         const allowedNamespaces = req.params.allowedNamespaces || [];
@@ -34,35 +36,60 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
         id: string,
         cb: () => void,
     ): void {
-        this.model.findById(id, (err:any, doc:any) => {
-            if (err) {
+        this.model.findById(id)
+            .then((doc: any) => {
+                if (!doc) {
+                    return next(new NotFoundError(`${id} does not exist`));
+                }
+                const namespace = doc.get("namespace") || undefined;
+                if (namespace && !this.namespaceAllowed(req, namespace)) {
+                    return next(new ForbiddenError("Insufficient namespace permissions"));
+                }
+                cb();
+            })
+            .catch((err: any) => {
                 if (err.name === "DocumentNotFoundError") {
                     return next(new NotFoundError(`${id} does not exist`));
                 }
                 return next(err);
-            }
-            const namespace = doc.get("namespace") || undefined;
-            if (namespace && !this.namespaceAllowed(req, namespace)) {
-                return next(new ForbiddenError("Insufficient namespace permissions"));
-            }
-            cb();
-        });
+            });
+    }
+
+    protected handleUpdateError(req: Request, next: Next, err: any): void {
+        if (err.name === "DocumentNotFoundError") {
+            return next(new NotFoundError(`${req.params.id} does not exist`));
+        } else if (err.name === "ValidationError") {
+            return next(new BadRequestError(err.message));
+        } else {
+            return next(err);
+        }
+    }
+
+    protected updateById(
+        req: Request,
+        res: Response,
+        next: Next,
+        id: string,
+        update: any,
+        options?: any,
+    ): void {
+        this.model.findByIdAndUpdate(id, update, options)
+            .then((old: any) => {
+                res.json(old);
+                res.end();
+            })
+            .catch((err: any) => this.handleUpdateError(req, next, err));
     }
 
     public deactivate(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next) => {
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(req.params.id, { active: false }, (err:Error) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.status(204);
-                    res.end();
-                });
+                this.model.findByIdAndUpdate(req.params.id, { active: false })
+                    .then(() => {
+                        res.status(204);
+                        res.end();
+                    })
+                    .catch((err: any) => this.handleUpdateError(req, next, err));
             });
         };
     }
@@ -88,17 +115,17 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                 query = query.sort(sort.replace(/,/g, " "));
             }
 
-            query.exec((err:any, doc:any) => {
-                if (err) {
+            query.exec()
+                .then((doc: any) => {
+                    res.json(doc);
+                })
+                .catch((err: any) => {
                     if (err.name === "DocumentNotFoundError") {
                         return next(new NotFoundError(`${req.params.id} does not exist`));
                     } else {
                         return next(err);
                     }
-                }
-
-                res.json(doc);
-            });
+                });
         };
     }
 
@@ -115,10 +142,10 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
                     return next(new ForbiddenError("Insufficient namespace permissions"));
                 }
             }
-            Promise.all(_.map((doc: Document) => doc.validate(), documents))
+            Promise.all(_.map((doc: AnyDocument) => doc.validate(), documents))
                 .then(() => this.beforeInsert(documents))
                 .then((documents) => {
-                    const objs = _.map((doc: Document) => doc.toObject(), documents);
+                    const objs = _.map((doc: AnyDocument) => doc.toObject(), documents);
                     // Nesting then/catch statements because we want to handle
                     // errors very differently.
                     this.model.collection.insertMany(objs)
@@ -137,7 +164,7 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
         };
     }
 
-    protected beforeInsert(documents: Document[]): Promise<Document[]> {
+    protected beforeInsert(documents: AnyDocument[]): Promise<AnyDocument[]> {
         return Promise.resolve(documents);
     }
 
@@ -196,8 +223,8 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
 
             Promise.all([
                 query.then(),
-                countQuery.count().then(),
-            ]).then(([docs, count]: [Document[], number]) => {
+                countQuery.countDocuments().then(),
+            ]).then(([docs, count]: [AnyDocument[], number]) => {
                 // Build pagination links.
                 let link = makeLink(0, "first");
                 // rel: prev
@@ -228,7 +255,7 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
 };
 
 export const DecidableMixin = (superclass: any) => class extends superclass {
-    protected model: Model<Document>;
+    protected model!: Model<any>;
 
     public appendDecision(): (req: Request, res: Response, next: Next) => void {
         return (req: Request, res: Response, next: Next): void => {
@@ -239,19 +266,7 @@ export const DecidableMixin = (superclass: any) => class extends superclass {
             const options = { runValidators: true };
 
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                this.model.findByIdAndUpdate(id, update, options, (err:Error, old:any) => {
-                    if (err) {
-                        if (err.name === "DocumentNotFoundError") {
-                            return next(new NotFoundError(`${req.params.id} does not exist`));
-                        } else if (err.name === "ValidationError") {
-                            return next(new BadRequestError(err.message));
-                        } else {
-                            return next(err);
-                        }
-                    }
-                    res.json(old);
-                    res.end();
-                });
+                this.updateById(req, res, next, id, update, options);
             });
         };
     }
@@ -264,15 +279,15 @@ export const DecidableMixin = (superclass: any) => class extends superclass {
             const query = { "_id": objId, "decisions._id": decisionId };
             const update = { $set: { "decisions.$.active": false } };
             this.ensureNamespaceAuthorizedForPatch(req, next, req.params.id, () => {
-                try {
-                    this.model.findOneAndUpdate(query, update);
-                    res.status(204);
-                    res.end();
-                    
-                }   catch(err) {
-                    res.status(500);
-                    return next(err);
-                }
+                this.model.findOneAndUpdate(query, update)
+                    .then(() => {
+                        res.status(204);
+                        res.end();
+                    })
+                    .catch((err: any) => {
+                        res.status(500);
+                        return next(err);
+                    });
             });
         };
     }

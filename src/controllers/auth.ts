@@ -16,8 +16,8 @@ export interface AuthControllerOptions {
 }
 
 export default class AuthController extends mix(Controller).with(CRUDMixin, DecidableMixin) {
-    private model: Model<Document>;
-    constructor(model: Model<Document>) {
+    protected model: Model<any>;
+    constructor(model: Model<any>) {
         super();
         this.model = model;
     }
