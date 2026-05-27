@@ -56,3 +56,7 @@ For deploying neuvue-queue in a production environment, see [automatizar](https:
 **v1**  
 
 Added `tags` field.
+
+**v2**
+
+Added optional `adaptive_priority` field for server-side weighted priority scoring with prior provenance.

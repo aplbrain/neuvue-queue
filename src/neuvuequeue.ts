@@ -46,7 +46,7 @@ export function isValidNeuvueQueueLogLevel(level: string): boolean {
 export default class NeuvueQueue {
     public readonly configuration: NeuvueQueueConfig;
     private logger: pino.BaseLogger;
-    private server: Server;
+    private server!: Server;
     constructor(config: NeuvueQueueConfig) {
         this.configuration = config;
         if (isValidNeuvueQueueLogLevel(this.configuration.server.logLevel)) {

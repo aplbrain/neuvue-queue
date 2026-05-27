@@ -6,8 +6,10 @@
         "noImplicitAny": true,
         "strictNullChecks": true,
         "moduleResolution": "node",
+        "rootDir": "src",
         "sourceMap": true,
         "outDir": "build",
+        "ignoreDeprecations": "6.0",
         "baseUrl": ".",
         "paths": {
             "*": [
