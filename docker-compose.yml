@@ -1,24 +1,39 @@
-version: "3"
 services:
   mongodb:
     container_name: mongodb
     image: mongo:8.0
     restart: on-failure
     volumes:
-      - mongo-data:/data/db
-      - /Users/xenesd1/Backups/:/data/archive/
+      - mongo-data-v8:/data/db
+      - ${NEUVUEQUEUE_ARCHIVE_DIR:-/Users/xenesd1/Backups}:/data/archive
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   neuvuequeue:
     container_name: neuvuequeue
-    build: "."
+    build:
+      context: "."
+    init: true
     ports:
-      - 80:80
+      - "9005:80"
     restart: on-failure
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
       NEUVUEQUEUE_MONGODB_DATABASE: neuvue
       NEUVUEQUEUE_MONGODB_HOST: mongodb
+      NEUVUEQUEUE_MONGODB_PORT: 27017
+      NEUVUEQUEUE_SERVER_HOST: 0.0.0.0
+      NEUVUEQUEUE_SERVER_PORT: 80
       # AUTH0_DOMAIN: dev-oe-jgl7m.us.auth0.com
       # AUTH0_AUDIENCE: https://queue.neuvue.io
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:80/docs/neuvuequeue.yaml').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
-  mongo-data:
+  mongo-data-v8:

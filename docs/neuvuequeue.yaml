@@ -154,6 +154,84 @@ components:
           type: string
       required:
         - code
+    AdaptivePriority:
+      type: object
+      description: >
+        Optional adaptive priority configuration and provenance. When enabled,
+        the queue computes scalar task priority from priors using weighted_sum_v1.
+      properties:
+        enabled:
+          type: boolean
+          default: false
+        strategy:
+          type: string
+          enum:
+            - weighted_sum_v1
+          default: weighted_sum_v1
+        priors:
+          type: object
+          description: Numeric or string-valued priority inputs keyed by prior name.
+          additionalProperties:
+            oneOf:
+              - type: number
+              - type: string
+        weights:
+          type: object
+          description: Numeric weights keyed by prior name. Missing weights default to 1.
+          additionalProperties:
+            type: number
+        categories:
+          type: object
+          description: Numeric lookup tables for string-valued categorical priors.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: number
+        bias:
+          type: number
+          default: 0
+        min:
+          type: number
+          default: 0
+        max:
+          nullable: true
+          type: number
+          default: null
+        score:
+          nullable: true
+          type: number
+          description: Last computed effective adaptive score.
+        contributions:
+          type: object
+          description: Per-prior numeric contribution from the last computation.
+          additionalProperties:
+            type: number
+        provenance:
+          type: object
+          description: Pass-through source, version, reason, or client metadata.
+        updated:
+          nullable: true
+          type: integer
+          description: Epoch timestamp of the last adaptive recompute.
+      example:
+        enabled: true
+        strategy: weighted_sum_v1
+        priors:
+          uncertainty: 0.8
+          category: merger
+        weights:
+          uncertainty: 10
+          category: 1
+        categories:
+          category:
+            merger: 5
+            split: 2
+        bias: 1
+        min: 0
+        max: null
+        provenance:
+          source: python-tool
+          version: v1
     Task:
       type: object
       properties:
@@ -183,6 +261,8 @@ components:
         priority:
           type: number
           minimum: 0
+        adaptive_priority:
+          $ref: '#/components/schemas/AdaptivePriority'
         duration:
           type: number
           minimum: 0
@@ -496,6 +576,10 @@ paths:
       tags:
         - Tasks
       summary: Get paginated list of tasks.
+      description: >
+        Higher priority values should be served first. Adaptive queues can be queried with
+        q={"status":"pending","active":true} and sort=-priority. Adaptive-only queues can
+        add q={"adaptive_priority.enabled":true}.
       parameters:
         - $ref: '#/components/parameters/queryParam'
         - $ref: '#/components/parameters/PageParam'
@@ -654,6 +738,10 @@ paths:
       tags:
         - Tasks
       summary: Set the priority of a task
+      description: >
+        This endpoint remains backward compatible and updates only the scalar priority.
+        It does not clear adaptive_priority; a later adaptive_priority patch can recompute
+        and overwrite the scalar priority.
       parameters:
         - name: taskId
           in: path
@@ -679,6 +767,75 @@ paths:
                 $ref: '#/components/schemas/Task'
         '400':
           description: Bad request. The ID is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /tasks/{taskId}/adaptive_priority:
+    patch:
+      tags:
+        - Tasks
+      summary: Patch adaptive priority inputs and recompute task priority
+      description: >
+        Shallowly merges priors, weights, categories, and provenance into the existing
+        adaptive_priority object. Replaces scalar adaptive config fields such as enabled,
+        bias, min, and max. If adaptive priority is enabled after the patch, the server
+        recomputes adaptive_priority.score, adaptive_priority.contributions,
+        adaptive_priority.updated, and the scalar task priority.
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: task ID.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdaptivePriority'
+            examples:
+              numeric:
+                summary: Numeric priors
+                value:
+                  enabled: true
+                  priors:
+                    uncertainty: 0.8
+                    age_hours: 4
+                  weights:
+                    uncertainty: 10
+                    age_hours: 0.5
+                  provenance:
+                    source: python-tool
+              categorical:
+                summary: Categorical prior
+                value:
+                  enabled: true
+                  priors:
+                    category: merger
+                  categories:
+                    category:
+                      merger: 5
+                      split: 2
+                  weights:
+                    category: 1
+      responses:
+        '200':
+          description: Adaptive priority has been changed. Returns the previous task object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad request. The adaptive priority object is invalid.
           content:
             application/json:
               schema:

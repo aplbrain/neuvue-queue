@@ -2,6 +2,10 @@ import _ from "lodash/fp";
 import { Document, Model } from "mongoose";
 import { Next, Request, Response, Server } from "restify";
 import { BadRequestError, NotFoundError, ForbiddenError } from "restify-errors";
+import {
+    applyAdaptivePriorityToTaskPayload,
+    mergeAdaptivePriority,
+} from "../utils/adaptive-priority";
 import mix from "../utils/mix";
 import Controller from "./controller";
 import { CRUDMixin, DetailOptions, QueryOptions } from "./mixins";
@@ -17,6 +21,86 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
     constructor(model: Model<any>) {
         super();
         this.model = model;
+    }
+
+    public insert(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next) => {
+            let body = req.body;
+            if (!Array.isArray(body)) {
+                body = Array.of(body);
+            }
+
+            let payloads: any[];
+            try {
+                payloads = body.map((raw: any) => applyAdaptivePriorityToTaskPayload(raw));
+            } catch (err: any) {
+                return next(new BadRequestError(err.message));
+            }
+
+            const documents = payloads.map((raw: object) => new this.model(raw));
+            for (const document of documents) {
+                const namespace = document.get("namespace") || undefined;
+                if (namespace && !this.namespaceAllowed(req, namespace)) {
+                    return next(new ForbiddenError("Insufficient namespace permissions"));
+                }
+            }
+
+            Promise.all(documents.map((doc: Document) => doc.validate()))
+                .then(() => {
+                    const objs = documents.map((doc: Document) => doc.toObject());
+                    this.model.collection.insertMany(objs)
+                        .then(() => {
+                            res.status(201);
+                            res.json(objs);
+                        })
+                        .catch((err: Error) => {
+                            next(err);
+                        });
+                })
+                .catch((err: Error) => {
+                    next(new BadRequestError(err.message));
+                });
+        };
+    }
+
+    public setAdaptivePriority(): (req: Request, res: Response, next: Next) => void {
+        return (req: Request, res: Response, next: Next): void => {
+            if (!_.isPlainObject(req.body)) {
+                return next(new BadRequestError("adaptive_priority must be a plain object"));
+            }
+
+            const id = req.params.id;
+            this.model.findById(id)
+                .then((doc: any) => {
+                    if (!doc) {
+                        return next(new NotFoundError(`${id} does not exist`));
+                    }
+                    const namespace = doc.get("namespace") || undefined;
+                    if (namespace && !this.namespaceAllowed(req, namespace)) {
+                        return next(new ForbiddenError("Insufficient namespace permissions"));
+                    }
+
+                    const adaptivePriority = mergeAdaptivePriority(doc.get("adaptive_priority"), req.body);
+                    let update: { [key: string]: any } = { adaptive_priority: adaptivePriority };
+                    if (adaptivePriority.enabled) {
+                        const payload = applyAdaptivePriorityToTaskPayload({ adaptive_priority: adaptivePriority });
+                        update = {
+                            adaptive_priority: payload.adaptive_priority,
+                            priority: payload.priority,
+                        };
+                    }
+                    this.updateById(req, res, next, id, update);
+                })
+                .catch((err: any) => {
+                    if (err.name === "DocumentNotFoundError") {
+                        return next(new NotFoundError(`${id} does not exist`));
+                    } else if (err.message && err.message.indexOf("adaptive_priority") === 0) {
+                        return next(new BadRequestError(err.message));
+                    } else {
+                        return next(err);
+                    }
+                });
+        };
     }
 
     public setStatus(): (req: Request, res: Response, next: Next) => void {
@@ -233,6 +317,7 @@ export default class TaskController extends mix(Controller).with(CRUDMixin) {
         server.del(`${root}/:id`, auth0(true, writeScopes),this.deactivate());
         server.patch(`${root}/:id/instructions`, auth0(true, writeScopes), this.setInstructions());
         server.patch(`${root}/:id/priority`, auth0(true, writeScopes), this.setPriority());
+        server.patch(`${root}/:id/adaptive_priority`, auth0(true, writeScopes), this.setAdaptivePriority());
         server.patch(`${root}/:id/duration`, auth0(true, writeScopes), this.incDuration());
         server.patch(`${root}/:id/status`, auth0(true, writeScopes), this.setStatus());
         server.patch(`${root}/:id/points`, auth0(true, writeScopes), this.appendPoint());
