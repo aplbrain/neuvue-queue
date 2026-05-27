@@ -29,7 +29,7 @@ export const CRUDMixin = (superclass: any) => class extends superclass {
         else if (allowedNamespaces.includes(namespace)) return true;
         else return false;
     }
-    
+
     protected ensureNamespaceAuthorizedForPatch(
         req: Request,
         next: Next,
